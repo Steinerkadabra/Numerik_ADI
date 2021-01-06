@@ -4,7 +4,15 @@ import os
 from tqdm import tqdm
 import time
 
-def thomas_algorithm(a_i, b_i, c_i, d_i):
+def thomas_algorithm(a_i: list, b_i: list, c_i: list, d_i: list) -> list:
+    """
+    Solve a system of linear equation defined with a tridiagonal matrix by the use of the Thomas algorithm.
+    :param a_i: lower diagonal elements.
+    :param b_i: diagonal elements.
+    :param c_i: upper diagonal elements.
+    :param d_i: right hand side.
+    :return: solution to the system of linear equation
+    """
     cp_i = [c_i[0]/b_i[0]]
     dp_i  =[d_i[0]/b_i[0]]
     for k in range(1, len(a_i)):
@@ -19,22 +27,40 @@ def thomas_algorithm(a_i, b_i, c_i, d_i):
 
     return x_i
 
-def trans(M):
+def trans(M: list) -> list:
+    """
+    Transpose the matrix defined as list.
+    :param M: matrix.
+    :return: transposed matrix.
+    """
     return [[M[j][i] for j in range(len(M))] for i in range(len(M[0]))]
 
 
 class T_profile:
-    def __init__(self, T, time):
+    def __init__(self, T: list, time: float):
+        """
+        temperature profile for a given timestep.
+        :param T: temperature profule.
+        :param time: time of evolution.
+        """
         self.time = time
         self.vals = T
 
 class grid:
-    def __init__(self, N, Tinit = False):
+    """
+    object that holds the grid on wich we solve the heat equation.
+    """
+    def __init__(self, N: int, Tinit: list = None ):
+        """
+
+        :param N: number of steps to divide the grid in x and y direction, respectively.
+        :param Tinit: initial temperature profile. If nothing given, we take the test case from the paper.
+        """
         self.N = N
         self.dxy = 1/(N-1)
         self.position_x = [ self.dxy*(k%N) for k in range( self.N**2) ]
         self.position_y = [ self.dxy*int(k/N) for k in range( self.N**2) ]
-        if not Tinit:
+        if Tinit == None:
             T = [[ 1 for k in range( self.N ) ] for l in range( self.N ) ]
         else:
             T = Tinit
@@ -48,7 +74,29 @@ class grid:
 
 
 class heat_equation:
-    def __init__(self, T_end, N, dt, solver = 'explicit', output_dir = 'results', show_plots =False, show_steps = 1,  save_plots = False, save_steps = 1,  solve = True, show_at_end= False, save_at_end = False, save_video = False, Tinit = None):
+    """
+    class to solve the heat equation with different solver.
+    """
+    def __init__(self, T_end: float, N: int, dt: float, solver: str=  'explicit', output_dir: str = 'results',
+                 show_plots: bool =False, show_steps: int = 1,  save_plots: bool = False, save_steps: int = 1,
+                 solve: bool = True, show_at_end: bool= False, save_at_end: bool = False, save_video: bool = False, Tinit: list = None):
+        """
+        initiate the solver class.
+        :param T_end: final time.
+        :param N: number of subdivision in x in y direction.
+        :param dt: timestep to be taken.
+        :param solver: solver to to use, Default: explicit, One of: explicit, ADI.
+        :param output_dir: directory to save the results in, Default: results,
+        :param show_plots: if True, plots are shown during the solving, Default: False.
+        :param show_steps: if show_plots is true, plots are shown in this step interval, Default: 1.
+        :param save_plots:if True, plots are saved during the solving, Default: False.
+        :param save_steps:if show_plots is true, plots are saved in this step interval, Default: 1.
+        :param solve: if true, the heat equation will be solved after initiating the class, Default: True.
+        :param show_at_end: if True, show a plot at the end of the solving process, Default: false.
+        :param save_at_end: if True, save a plot at the end of the solving process, Default: false.
+        :param save_video: if plots are saved, and this is True, produce a video of all saved plots.
+        :param Tinit: initial temperature profile. If nothing given, we take the test case from the paper.
+        """
         self.T_end = T_end
         self.N = N
         self.dxy = 1/(N-1)
@@ -108,7 +156,6 @@ class heat_equation:
 
     def produce_video(self):
         print('Producing video')
-        # os.system(f'ffmpeg -r 1/30 -i {self.output_dir}/t_Profile_%04d.png -c:v libx264 -vf fps=25 -pix_fmt yuv420p {self.output_dir}/out.mp4')
         os.system(f'ffmpeg -framerate 25 -i {self.output_dir}//t_Profile_%04d.png -vf format=yuv420p  {self.output_dir}//output.mp4')
 
     def produce_grid(self):
@@ -148,6 +195,7 @@ class heat_equation:
     def take_step_ADI(self, save_plot=False, show_plot=False):
         self.step = self.step + 1
         Told = self.solve_grid.T.vals.copy()
+
         T_new = self.solve_grid.T.vals.copy()
         for i in range(1, self.N - 1):
             T_i = Told[i].copy()
@@ -184,64 +232,6 @@ class heat_equation:
             if show_plot and self.step %self.show_steps == 0:
                 plt.show()
             plt.close()
-
-    def take_step_ADI_old(self, save_plot = False, show_plot = False):
-        Told = self.solve_grid.T.vals.copy()
-        T_new = self.solve_grid.T.vals.copy()
-        for i in range(1, self.N-1):
-            T_i = Told[i].copy()
-
-            D = [(2-self.rho)*T_i[1] - T_i[2]]
-            w = [-(2+self.rho)]
-            b  = [1/w[0]]
-            g = [D[0]/w[0]]
-
-            for j in range(1, self.N-2):
-                w.append(-(2+self.rho) - b[j-1])
-                b.append(1/w[j])
-                D.append(-T_i[j-1] + (2-self.rho)*T_i[j] - T_i[j+1])
-                g.append((D[j]-g[j-1])/w[j])
-
-            T_new_i = [g[-1]]
-            for k in range(self.N - 3, 0, -1):
-                T_new_i.append(g[k]- b[k]*T_new_i[-1])
-
-
-            T_new_i = T_new_i[::-1]
-
-            T_new_i.insert(0, 0)
-            T_new_i.append(0)
-            T_new[i] = T_new_i.copy()
-
-        Told = T_new
-
-        for j in range(1, self.N - 1):
-            T_j = trans(Told.copy())[j]
-
-
-            D = [(2 - self.rho) * T_j[1] - T_j[2]]
-            w = [-(2 + self.rho)]
-            b = [1 / w[0]]
-            g = [D[0] / w[0]]
-
-            for i in range(1, self.N - 2):
-                w.append(-(2 + self.rho) - b[i-1])
-                b.append(1 / w[i])
-                D.append(-T_j[i - 1] + (2 - self.rho) * T_j[i] - T_j[i + 1])
-                g.append((D[i] - g[i-1]) / w[i])
-
-            T_new_j = [g[-1]]
-            for k in range(self.N - 3, 0, -1):
-                T_new_j.append(g[k] - b[k] * T_new_j[-1])
-
-            T_new_j = T_new_j[::-1]
-            T_new_j.insert(0, 0)
-            T_new_j.append(0)
-            T_new[j] = T_new_j.copy()
-        T_new = trans(T_new)
-
-        self.solve_grid.T = T_profile(T_new, self.dt*self.step)
-        self.solve_grid.T_history.append(self.solve_grid.T)
 
 
     def plot(self):

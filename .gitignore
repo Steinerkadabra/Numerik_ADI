@@ -9,3 +9,5 @@ transport_problem.py
 Contour_plots.py
 Thomas_algorithm*
 exercise*
+.idea
+.DS_Store
