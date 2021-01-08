@@ -1,0 +1,177 @@
+\documentclass[a4aper,pagesize]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage{float}
+\usepackage{subfigure}
+\usepackage{subfigure}
+\usepackage{stmaryrd}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+\usepackage{wrapfig}
+\usepackage{blindtext}
+
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{thm}[mydef]{Theorem}
+\theoremstyle{remark}
+\newtheorem{bem}{Bemerkung}[section]
+
+\newcommand{\func}[3]{$ #1 : #2 \rightarrow #3 $}
+\newcommand{\xvecn}[1]{$( #1 _1,...,#1 _n)$}
+\newcommand{\xser}[2]{$ #1 _1,...,#1 _#2$}
+\newcommand{\ser}[2]{ #1 _1,...,#1 _#2}
+\newcommand{\xvec}[2][n]{$( #2 _1,...,#2 _{#1})$}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\Borel}{\mathcal{B}}
+\newcommand{\bernulli}{\mathrm{Ber}}
+\newcommand{\uniform}{\mathrm{U}}
+\newcommand{\indicator}{\mathbbm{1}}
+\newcommand{\pderiv}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\di}{\mathrm{d}}
+\renewcommand{\hat}{\widehat}
+
+%setzt den hervorhebungsstil
+\DeclareTextFontCommand{\emph}{\bfseries}
+
+%verhindert einrückung bei neuem absatz
+%\setlength{\parindent}{0em} 
+
+\title{Title}
+\date{\today}
+\author{Thomas Steindl, Daylen Thimm}
+
+\begin{document}
+
+\maketitle
+
+\section{Van Neumann Stability Analysis: Explicit Scheme}
+The explicit scheme for the two dimensional heat equation is
+\begin{align}
+	&\frac{T_{j,k}^{n+1} - T_{j,k}^{n}}{\Delta t} = \frac{T_{j-1,k}^{n} - 2 T_{j,k}^{n} + T_{j+1,k}^{n}}{(\Delta x)^2} + \frac{T_{j,k-1}^{n} - 2 T_{j,k}^{n} + T_{j,k+1}^{n}}{(\Delta y)^2} \Leftrightarrow\\
+	\Leftrightarrow & T_{j,k}^{n+1} =  T_{j,k}^{n} + \frac{1}{\rho} \left( T_{j-1,k}^{n} - 2 T_{j,k}^{n} + T_{j+1,k}^{n} + T_{j,k-1}^{n} - 2 T_{j,k}^{n} + T_{j,k+1}^{n}\right)
+\end{align}
+assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. We begin our Van Neumann stability analysis by inserting the fourier series
+\begin{equation}
+	T_{j,k}^n = \sum_{p,q = 0}^{N-1} \hat{T}^n_{p,q} e^{ipx_j + iqy_k}
+\end{equation}
+into the numerical scheme. We obtain
+\begin{equation}
+	\begin{split}
+		\sum_{p,q = 0}^{N-1} \hat{T}^{n+1}_{p,q} e^{i(px_{j} + qy_{k})} =
+		\sum_{p,q = 0}^{N-1} (
+			&\hat{T}^{n}_{p,q} e^{i(px_{j} + qy_{k})} +
+			\frac{1}{\rho} (
+			  	  \hat{T}^{n}_{p,q} e^{i(px_{j-1} qy_{k})}
+				+ \hat{T}^{n}_{p,q} e^{i(px_{j+1} + qy_{k})} + \\
+			   &+ \hat{T}^{n}_{p,q} e^{i(px_{j} + qy_{k-1})}
+				+ \hat{T}^{n}_{p,q} e^{i(px_{j} + qy_{k+1})}
+				-  4 \hat{T}^{n}_{p,q} e^{i(px_{j} + qy_{k})}
+			)
+		).
+	\end{split}
+\end{equation}
+Using that $x_{j+1} = {x_j} + h$ and $x_{j-1} = {x_j} - h$ and that the discretization in $x$ and $y$ are the same we get
+\begin{equation}
+	\sum_{p,q = 0}^{N-1}(
+		  \hat{T}^{n+1}_{p,q}
+		- \hat{T}^{n}_{p,q}
+		-\frac{1}{\rho} (
+			  \hat{T}^{n}_{p,q} e^{-iph}
+			+ \hat{T}^{n}_{p,q} e^{iph}
+		    + \hat{T}^{n}_{p,q} e^{-iqh}
+			+ \hat{T}^{n}_{p,q} e^{iqh}
+			-  4 \hat{T}^{n}_{p,q}
+		)
+	)\, e^{i(px_{j} + qy_{k})} = 0
+\end{equation}
+and because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of the triginometrical polynomials of degree $N$ in two variables we have for all $p,q \in \{0, \dots, N-1\}$ that
+\begin{align*}
+	  &\hat{T}^{n+1}_{p,q}
+	- \hat{T}^{n}_{p,q}
+	-\frac{1}{\rho} (
+		  \hat{T}^{n}_{p,q} e^{-iph}
+		+ \hat{T}^{n}_{p,q} e^{iph}
+	    + \hat{T}^{n}_{p,q} e^{-iqh}
+		+ \hat{T}^{n}_{p,q} e^{iqh}
+		-  4 \hat{T}^{n}_{p,q}
+	)= 0
+&\Leftrightarrow\\
+\Leftrightarrow
+	  &\hat{T}^{n+1}_{p,q} =
+      \hat{T}^{n}_{p,q}
+	 +\frac{1}{\rho} (
+		  \hat{T}^{n}_{p,q} e^{-iph}
+		+ \hat{T}^{n}_{p,q} e^{iph}
+	    + \hat{T}^{n}_{p,q} e^{-iqh}
+		+ \hat{T}^{n}_{p,q} e^{iqh}
+		-  4 \hat{T}^{n}_{p,q}
+	)
+&\Leftrightarrow\\
+\Leftrightarrow
+	  &\hat{T}^{n+1}_{p,q} =
+      \hat{T}^{n}_{p,q}(
+      1
+	 +\frac{1}{\rho} (
+		  e^{-iph}
+		+ e^{iph}
+	    + e^{-qh}
+		+ e^{qh}
+		-  4
+	    )
+	)
+&\Leftrightarrow\\
+\Leftrightarrow
+	  &\hat{T}^{n+1}_{p,q} =
+      \hat{T}^{n}_{p,q}\right(
+      1
+	 +\frac{1}{\rho} (
+		  2\cos(ph)
+	    + 2\cos(qh)
+	    - 4
+	    )
+	\right)
+&\Leftrightarrow\\
+\Leftrightarrow
+	  &\hat{T}^{n+1}_{p,q} =
+      \hat{T}^{n}_{p,q}\underbrace{\left(
+      1
+	 -\frac{4}{\rho} \left(
+	      \sin^2\left(\frac{ph}{2}\right)
+	    + \sin^2\left(\frac{qh}{2}\right)
+	    \right)
+	  \right)}_{=:G_{p,q}},
+\end{align*}
+where in the last step the identity $\sin^2(\alpha\2) = \frac{1}{2}(1-\cos(\alpha))$ was used. For van neumann stability we need that $|G_{p,q}|<1$. We therefor want to find conditions on $\Delta t$ and $h$ such that
+\begin{equation}
+-1 \le
+	1-\frac{4}{\rho} \left(
+		  \sin^2\left(\frac{ph}{2}\right)
+	    + \sin^2\left(\frac{qh}{2}\right)
+	\right)
+	\le 1.
+\end{equation}
+The rhight hand side inequality is trivial and for the left hand side inequality we need that $\rho \geq 4$.
+
+
+
+
+
+
+
+\end{document}
+
