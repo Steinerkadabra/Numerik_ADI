@@ -285,7 +285,155 @@ which is equivalent to
 Clearly here $|G_{p,q}|\leq1$ is always fulfilled. Therefore the implicit scheme is unconditionally stable and hence no CFL condition is existent.
 
 \section{Van Neumann Stability Analysis: ADI Scheme}
-The ADI scheme consists of the two half steps
+The alternating direction implicit (ADI) method  consists of the two half steps
+\begin{align}
+	\frac{T_{j,k}^{2n+1} - T_{j,k}^{2n}}{\Delta t}
+	&= \frac{T_{j-1,k}^{2n+1} - 2 T_{j,k}^{2n+1} + T_{j+1,k}^{2n+1}}{(\Delta x)^2}
+	+ \frac{T_{j,k-1}^{2n} - 2 T_{j,k}^{2n} + T_{j,k+1}^{2n}}{(\Delta y)^2}
+\\
+	\frac{T_{j,k}^{2n+2} - T_{j,k}^{2n+1}}{\Delta t}
+	&= \frac{T_{j-1,k}^{2n+1} - 2 T_{j,k}^{2n+1} + T_{j+1,k}^{2n+1}}{(\Delta x)^2}
+	+ \frac{T_{j-1,k}^{2n+2} - 2 T_{j,k}^{2n+2} + T_{j+1,k}^{2n+2}}{(\Delta y)^2}
+\end{align}
+Due to the fact that these schemes are identical except for an index shift and a transposition of the $x$ and $y$ direction we only consider the first half step for the stability analysis, the second one can then easily be deduced. Using the same strategy as in the previous examples we begin by bringing all terms to one side and separating the terms of the $2n$-th step from the ones of the $(2n+1)$-th step. This leaves us with
+\begin{equation}
+	T_{j,k}^{2n+1}
+	- \frac{1}{\rho}\left(
+		T_{j-1,k}^{2n+1}
+		-2T_{j,k}^{2n+1}
+		+T_{j,k}^{2n+1}
+	\right)
+	-T_{j,k}^{2n}
+	- \frac{1}{\rho}\left(
+		T_{j-1,k}^{2n}
+		-2T_{j,k}^{2n}
+		+T_{j,k}^{2n}
+	\right)
+	=
+	0,
+\end{equation}
+assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. Again we start by inserting the Fourier series
+\begin{equation}
+	T_{j,k}^n = \sum_{p,q = 0}^{N-1} \hat{T}^n_{p,q} e^{ipx_j + iqy_k}
+\end{equation}
+into the numerical stencil. We bring all terms to one side of the equation and again by using $x_{j+1} = {x_j} + h$ and $x_{j-1} = {x_j} - h$ and that the discretization in $x$ and $y$ are the same and also by placing the exponential outside of the brackets we get
+\begin{dmath}
+	\sum_{p,q = 0}^{N-1}\left(
+		\hat{T}_{p,q}^{2n+1}
+		-\frac{1}{\rho}\left(
+			\hat{T}_{p,q}^{2n+1} e^{-iph}
+			- 2 \hat{T}_{p,q}^{2n+1}
+			+ \hat{T}_{p,q}^{2n+1} e^{iph}
+		\right)
+		-\\
+		-\hat{T}_{p,q}^{2n+1}
+		-\frac{1}{\rho}\left(
+			\hat{T}_{p,q}^{2n} e^{-iph}
+			- 2 \hat{T}_{p,q}^{2n}
+			+ \hat{T}_{p,q}^{2n} e^{iph}
+		\right)
+	\right)
+	e^{i(px_j + qy_k)}
+	=
+	0.
+\end{dmath}
+Because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of the trigonometrical polynomials of degree $N$ in two variables we have for all $p,q \in \{0, \dots, N-1\}$ that the coefficients of the exponentials must be zero. Rearranging the terms gives us that for all $p,q \in \{0, \dots, N-1\}$ that
+\begin{align}
+	&\hat{T}_{p,q}^{2n+1}
+	\left(
+		1
+		-\frac{1}{\rho}\left(
+			e^{-iph}
+			+ e^{iph}
+			- 2
+		\right)
+	\right)
+	=
+	\hat{T}_{p,q}^{2n}
+	\left(
+		1
+		-\frac{1}{\rho}\left(
+			e^{-iqh}
+			+ e^{iqh}
+			- 2
+		\right)
+	\right)
+\Leftrightarrow\\
+\Leftrightarrow&
+	\hat{T}_{p,q}^{2n+1}
+	=
+	\hat{T}_{p,q}^{2n}
+	\frac{
+		1
+		-\frac{1}{\rho}\left(
+			e^{-iqh}
+			+ e^{iqh}
+			- 2
+		\right)
+	}{
+		1
+		-\frac{1}{\rho}\left(
+			e^{-iph}
+			+ e^{iph}
+			- 2
+		\right)
+	}
+	=
+	\hat{T}_{p,q}^{2n+1}
+	=
+	\hat{T}_{p,q}^{2n}
+	\frac{
+		1-\frac{1}{\rho}(2\cos(ph)- 2)
+	}{
+		1-\frac{1}{\rho}(2\cos(qh)- 2)
+	}
+\Leftrightarrow\\
+\Leftrightarrow&
+	\hat{T}_{p,q}^{2n+1}
+	=
+	\hat{T}_{p,q}^{2n}
+	\frac{
+		1-\frac{4}{\rho}\left(\sin^2\left(\frac{ph}{2}\right)\right)
+	}{
+		1-\frac{4}{\rho}\left(\sin^2\left(\frac{qh}{2}\right)\right)
+	}
+\Leftrightarrow\\
+\Leftrightarrow&
+	\hat{T}_{p,q}^{2n+1}
+	=
+	\hat{T}_{p,q}^{2n}
+	\underbrace{
+		\frac{
+			\rho-4\sin^2\left(\frac{ph}{2}\right)
+		}{
+			\rho-4\sin^2\left(\frac{qh}{2}\right)
+		}
+	}_{=:G_{p,q}^{(1)}}.
+\end{align}
+By performing an index shift and switching the two space dimensions i.e.
+\begin{eqnarray*}
+	2n &\rightarrow &2n+1\\
+	2n+1 &\rightarrow &2n+2\\
+	p &\rightarrow &q\\
+	q &\rightarrow &p
+\end{eqnarray*}
+we get the analogue equation for the second half step of the ADI method.
+\begin{equation}
+	\hat{T}_{p,q}^{2n+2}
+	=
+	\hat{T}_{p,q}^{2n+1}
+	\underbrace{
+		\frac{
+			\rho-4\sin^2\left(\frac{qh}{2}\right)
+		}{
+			\rho-4\sin^2\left(\frac{ph}{2}\right)
+		}
+	}_{=:G_{p,q}^{(2)}}.
+\end{equation}
+
+
+
+
 
 \end{document}
 
