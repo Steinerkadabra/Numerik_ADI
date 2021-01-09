@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.11.27)  8 JAN 2021 20:09
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.11.27)  9 JAN 2021 11:52
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -617,89 +617,10 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 61.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Trying to load font information for U+stmry on input line 61.
- (/usr/share/texlive/texmf-dist/tex/latex/stmaryrd/Ustmry.fd)
-./VanNeumannStabilityAnalysis.tex:158: Missing } inserted.
-<inserted text> 
-                }
-l.158 \end{align*}
-                  
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-./VanNeumannStabilityAnalysis.tex:158: Extra \right.
-<argument> ...}_{p,q} = \hat {T}^{n}_{p,q}\right (
-                                                   1 +\frac {1}{\rho } ( 2\c...
-l.158 \end{align*}
-                  
-I'm ignoring a \right that had no matching \left.
-
-./VanNeumannStabilityAnalysis.tex:158: Extra \right.
-<argument> ...cos (ph) + 2\cos (qh) - 4 ) \right )
-                                                   &\Leftrightarrow \\ \Left...
-l.158 \end{align*}
-                  
-I'm ignoring a \right that had no matching \left.
-
-./VanNeumannStabilityAnalysis.tex:158: Missing { inserted.
-<inserted text> 
-                {
-l.158 \end{align*}
-                  
-I've put in what seems to be necessary to fix
-the current column of the current alignment.
-Try to go on, since this might almost work.
-
-./VanNeumannStabilityAnalysis.tex:158: Missing } inserted.
-<inserted text> 
-                }
-l.158 \end{align*}
-                  
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-./VanNeumannStabilityAnalysis.tex:158: Extra \right.
-<argument> ...}_{p,q} = \hat {T}^{n}_{p,q}\right (
-                                                   1 +\frac {1}{\rho } ( 2\c...
-l.158 \end{align*}
-                  
-I'm ignoring a \right that had no matching \left.
-
-./VanNeumannStabilityAnalysis.tex:158: Extra \right.
-<argument> ...cos (ph) + 2\cos (qh) - 4 ) \right )
-                                                   &\Leftrightarrow \\ \Left...
-l.158 \end{align*}
-                  
-I'm ignoring a \right that had no matching \left.
-
-./VanNeumannStabilityAnalysis.tex:158: Missing { inserted.
-<inserted text> 
-                {
-l.158 \end{align*}
-                  
-I've put in what seems to be necessary to fix
-the current column of the current alignment.
-Try to go on, since this might almost work.
-
-[1
+ (/usr/share/texlive/texmf-dist/tex/latex/stmaryrd/Ustmry.fd) [1
 
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-./VanNeumannStabilityAnalysis.tex:159: Undefined control sequence.
-l.159 ...e last step the identity $\sin^2(\alpha\2
-                                                  ) = \frac{1}{2}(1-\cos(\al...
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-[2] (./VanNeumannStabilityAnalysis.aux) ) 
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] (./VanNeumannStabilityAnalysis.aux) ) 
 Here is how much of TeX's memory you used:
  19591 strings out of 481239
  386223 string characters out of 5920376
@@ -709,7 +630,7 @@ Here is how much of TeX's memory you used:
  1141 hyphenation exceptions out of 8191
  64i,18n,81p,10149b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfsx1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfsx2074.pfb>
-Output written on VanNeumannStabilityAnalysis.pdf (2 pages, 148868 bytes).
+Output written on VanNeumannStabilityAnalysis.pdf (2 pages, 149308 bytes).
 PDF statistics:
  71 PDF objects out of 1000 (max. 8388607)
  52 compressed objects within 1 object stream

@@ -103,47 +103,47 @@ and because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of t
 \begin{align*}
 	  &\hat{T}^{n+1}_{p,q}
 	- \hat{T}^{n}_{p,q}
-	-\frac{1}{\rho} (
+	-\frac{1}{\rho} \left(
 		  \hat{T}^{n}_{p,q} e^{-iph}
 		+ \hat{T}^{n}_{p,q} e^{iph}
 	    + \hat{T}^{n}_{p,q} e^{-iqh}
 		+ \hat{T}^{n}_{p,q} e^{iqh}
 		-  4 \hat{T}^{n}_{p,q}
-	)= 0
+	\right)= 0
 &\Leftrightarrow\\
 \Leftrightarrow
 	  &\hat{T}^{n+1}_{p,q} =
       \hat{T}^{n}_{p,q}
-	 +\frac{1}{\rho} (
+	 +\frac{1}{\rho} \left(
 		  \hat{T}^{n}_{p,q} e^{-iph}
 		+ \hat{T}^{n}_{p,q} e^{iph}
 	    + \hat{T}^{n}_{p,q} e^{-iqh}
 		+ \hat{T}^{n}_{p,q} e^{iqh}
 		-  4 \hat{T}^{n}_{p,q}
-	)
+	\right)
 &\Leftrightarrow\\
 \Leftrightarrow
 	  &\hat{T}^{n+1}_{p,q} =
-      \hat{T}^{n}_{p,q}(
+      \hat{T}^{n}_{p,q}\left(
       1
-	 +\frac{1}{\rho} (
+	 +\frac{1}{\rho} \left(
 		  e^{-iph}
 		+ e^{iph}
 	    + e^{-qh}
 		+ e^{qh}
 		-  4
-	    )
-	)
+	    \right)
+	\right)
 &\Leftrightarrow\\
 \Leftrightarrow
 	  &\hat{T}^{n+1}_{p,q} =
-      \hat{T}^{n}_{p,q}\right(
+      \hat{T}^{n}_{p,q}\left(
       1
-	 +\frac{1}{\rho} (
+	 +\frac{1}{\rho} \left(
 		  2\cos(ph)
 	    + 2\cos(qh)
 	    - 4
-	    )
+	    \right)
 	\right)
 &\Leftrightarrow\\
 \Leftrightarrow
@@ -156,7 +156,7 @@ and because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of t
 	    \right)
 	  \right)}_{=:G_{p,q}},
 \end{align*}
-where in the last step the identity $\sin^2(\alpha\2) = \frac{1}{2}(1-\cos(\alpha))$ was used. For van neumann stability we need that $|G_{p,q}|<1$. We therefor want to find conditions on $\Delta t$ and $h$ such that
+where in the last step the identity $\sin^2(\alpha/2) = \frac{1}{2}(1-\cos(\alpha))$ was used. For van Neumann stability we need that $|G_{p,q}|<1$. We therefor want to find conditions on $\Delta t$ and $h$ such that
 \begin{equation}
 -1 \le
 	1-\frac{4}{\rho} \left(
