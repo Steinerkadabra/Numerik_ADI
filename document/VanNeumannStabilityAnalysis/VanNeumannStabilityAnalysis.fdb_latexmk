@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1610196380 "VanNeumannStabilityAnalysis.tex" "VanNeumannStabilityAnalysis.pdf" "VanNeumannStabilityAnalysis" 1610196381
+["pdflatex"] 1610205092 "VanNeumannStabilityAnalysis.tex" "VanNeumannStabilityAnalysis.pdf" "VanNeumannStabilityAnalysis" 1610205092
   "/etc/texmf/web2c/texmf.cnf" 1606477644 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecrm1095.tfm" 1136768653 3584 929cdff2b7a8c11bd4d49fd68cb0ae70 ""
@@ -183,9 +183,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1581979058 38841 ce3692aa899bb693b90b87eaa5d4d84e ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1606478544 4770781 1ed1abab22da9c3e2cc82e4db562318b ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1606478601 8264052 3c9e4ea2b9e58ff40edcd90035042b5f ""
-  "VanNeumannStabilityAnalysis.aux" 1610196381 379 4d38bd7d66825aa8a1d763af97efeb7e "pdflatex"
-  "VanNeumannStabilityAnalysis.tex" 1610196380 6838 d186a0af4ddaaee08f4e5a9a79a82a7c ""
+  "VanNeumannStabilityAnalysis.aux" 1610205092 507 907968b4829e5c9dcd6cc0d0703ab7cf "pdflatex"
+  "VanNeumannStabilityAnalysis.tex" 1610205090 8138 f62184c8e75d63ded6ee693c6d9c9a94 ""
   (generated)
-  "VanNeumannStabilityAnalysis.aux"
-  "VanNeumannStabilityAnalysis.pdf"
   "VanNeumannStabilityAnalysis.log"
+  "VanNeumannStabilityAnalysis.pdf"
+  "VanNeumannStabilityAnalysis.aux"

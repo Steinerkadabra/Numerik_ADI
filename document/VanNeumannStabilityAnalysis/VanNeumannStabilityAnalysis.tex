@@ -78,7 +78,7 @@ The explicit scheme for the two dimensional heat equation is
 		- 4 T_{j,k}^{n}
 	\right)
 \end{align}
-assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. We begin our Van Neumann stability analysis by inserting the fourier series
+assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. We begin our Van Neumann stability analysis by inserting the Fourier series
 \begin{equation}
 	T_{j,k}^n = \sum_{p,q = 0}^{N-1} \hat{T}^n_{p,q} e^{ipx_j + iqy_k}
 \end{equation}
@@ -112,7 +112,7 @@ Using that $x_{j+1} = {x_j} + h$ and $x_{j-1} = {x_j} - h$ and that the discreti
 		)
 	)\, e^{i(px_{j} + qy_{k})} = 0
 \end{equation}
-and because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of the triginometrical polynomials of degree $N$ in two variables we have for all $p,q \in \{0, \dots, N-1\}$ that
+and because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of the trigonometrical polynomials of degree $N$ in two variables we have for all $p,q \in \{0, \dots, N-1\}$ that
 \begin{align*}
 	  &\hat{T}^{n+1}_{p,q}
 	- \hat{T}^{n}_{p,q}
@@ -178,7 +178,7 @@ where in the last step the identity $\sin^2(\alpha/2) = \frac{1}{2}(1-\cos(\alph
 	\right)
 	\le 1.
 \end{equation}
-The rhight hand side inequality is trivial and for the left hand side inequality we need that $\rho \geq 4$. This gives us the CFL condition
+The right hand side inequality is trivial and for the left hand side inequality we need that $\rho \geq 4$. This gives us the CFL condition
 \begin{equation}
 	\frac{h^2}{\Delta t} = \rho \geq 4 \Leftrightarrow \Delta t \leq \frac{h^2}{4} = \frac{1}{4N^2}.
 \end{equation}
@@ -205,7 +205,7 @@ The implicit scheme for the two dimensional heat equation is
 		- 4 T_{j,k}^{n+1}
 	\right)
 \end{align}
-assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. Again, we begin our Van Neumann stability analysis by inserting the fourier series
+assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. Again, we begin our Van Neumann stability analysis by inserting the Fourier series
 \begin{equation}
 	T_{j,k}^n = \sum_{p,q = 0}^{N-1} \hat{T}^n_{p,q} e^{ipx_j + iqy_k}
 \end{equation}
@@ -219,16 +219,73 @@ into the numerical stencil. We bring all terms to one side of the equation and a
 			+ \hat{T}_{p,q}^{n+1} e^{iph}
 			+ \hat{T}_{p,q}^{n+1} e^{-iqh}+\\
 			+ \hat{T}_{p,q}^{n+1} e^{iph}
-			+ \hat{T}_{p,q}^{n+1}
+			- 4\hat{T}_{p,q}^{n+1}
 		\right)
 	\right)
 	e^{i(px_j + qy_k)}
 	=
 	0.
 \end{dmath}
+Again because the occurring exponentials is a basis of the trigonometrical polynomials the exponentials coefficients must be zero. From this we calculate
+\begin{dmath}
+	\hat{T}_{p,q}^{n}
+	=
+	\hat{T}_{p,q}^{n+1}
+	-\frac{1}{\rho}\left(
+		\hat{T}_{p,q}^{n+1} e^{-iph}
+		+ \hat{T}_{p,q}^{n+1} e^{iph}
+		+ \hat{T}_{p,q}^{n+1} e^{-iqh}
+		+ \hat{T}_{p,q}^{n+1} e^{iph}
+		- 4\hat{T}_{p,q}^{n+1}
+	\right)
+	=
+	\hat{T}_{p,q}^{n+1}\left(
+		1
+		-\frac{1}{\rho}\left(
+			e^{-iph}
+			+e^{iph}
+			+e^{-iqh}
+			+e^{iph}
+			- 4
+		\right)
+	\right)
+	=
+	\hat{T}_{p,q}^{n+1}\left(
+		1
+		-\frac{1}{\rho}\left(
+			2\cos(ph)
+			+ 2\cos(qh)
+			- 4
+		\right)
+	\right)
+	=
+	\hat{T}_{p,q}^{n+1}\left(
+		1
+		-\frac{4}{\rho}\left(
+			\sin^2\left(\frac{ph}{2}\right)
+			+ \sin^2\left(\frac{qh}{2}\right)
+		\right)
+	\right),
+\end{dmath}
+which is equivalent to
+\begin{dmath}
+	\hat{T}_{p,q}^{n+1}
+	=
+	\hat{T}_{p,q}^{n}
+	\underbrace{
+		\frac{1}{
+			1
+			-\frac{4}{\rho}\left(
+				\sin^2\left(\frac{ph}{2}\right)
+				+ \sin^2\left(\frac{qh}{2}\right)
+			\right)
+		}.
+	}_{=:G_{p,q}}
+\end{dmath}
+Clearly here $|G_{p,q}|\leq1$ is always fulfilled. Therefore the implicit scheme is unconditionally stable and hence no CFL condition is existent.
 
-
-
+\section{Van Neumann Stability Analysis: ADI Scheme}
+The ADI scheme consists of the two half steps
 
 \end{document}
 
