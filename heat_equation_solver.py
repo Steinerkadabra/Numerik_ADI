@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import os
 from tqdm import tqdm
 import time
-from numba import jit
 
-@jit
-def analytic_solution(x, y, t):
+
+
+def analytic_solution(x, y, t, nFourier=101):
     """
     Calculate the analytic solution for the test problem. (Sum would need to go infinity of course).
     :param x: x position
@@ -14,13 +14,17 @@ def analytic_solution(x, y, t):
     :param t: time
     :return: solution for the temperature of position (x,y) at time t.
     """
-    sol = 0
-    for n in range(1, 101,2):
-        for m in range(1, 101,2):
-            npi = n*np.pi
-            mpi = m*np.pi
-            sol += 16/(npi*mpi)*np.sin(npi*x)*  np.sin(mpi*y) * np.exp(-(m**2 + n**2)*np.pi**2*t)
+    ns = np.arange(1, nFourier, 2) * np.pi
+    fexp = np.exp(-ns**2 * t)
+    coeff = 4/ns * fexp
+
+    fx = coeff * np.sin(ns*x)
+    fy = coeff * np.sin(ns*y)
+
+    sol = np.einsum('i,j->', fx, fy)
+
     return sol
+
 
 
 def thomas_algorithm(a_i: list, b_i: list, c_i: list, d_i: list) -> list:
@@ -270,7 +274,7 @@ class heat_equation:
 
 # sol = analytic_solution(0.1, 0.5,0)
 # print(sol)
-fun = heat_equation(0.025, 101, 0.0001, solve = True, solver = 'ADI', output_dir='ADI_51_min')
+fun = heat_equation(0.025, 101, 0.00001, solve = True, solver = 'explicit', output_dir='ADI_51_min')
 # print(fun.solve_grid.T.vals)
 fun.solve_grid.get_analytic()
 
@@ -282,15 +286,18 @@ for j in range(fun.N):
 
 
 
-fig, ax = plt.subplots(3,1, figsize=(10, 10))
-ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=2)
-ax[0].set_title(f'ADI solver')
-ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=2)
-ax[1].set_title(f'analytic solver')
-ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.0005, vmax=0.0005)
+fig, ax = plt.subplots(1,3, figsize=(13, 3))
+p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+fig.colorbar(p1, ax=ax[0])
+ax[0].set_title(f'ecplicit solver')
+p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+fig.colorbar(p2, ax=ax[1])
+ax[1].set_title(f'analytic solution')
+p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.1, vmax=0.1)
+fig.colorbar(p3, ax=ax[2])
 ax[2].set_title(f'residuals')
 
-plt.show()
+plt.savefig('explicit.jpg')
 
 
 
