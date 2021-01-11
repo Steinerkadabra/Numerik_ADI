@@ -3,13 +3,23 @@ import matplotlib.pyplot as plt
 import os
 from tqdm import tqdm
 import time
+from numba import jit
 
+@jit
 def analytic_solution(x, y, t):
+    """
+    Calculate the analytic solution for the test problem. (Sum would need to go infinity of course).
+    :param x: x position
+    :param y: y position
+    :param t: time
+    :return: solution for the temperature of position (x,y) at time t.
+    """
     sol = 0
-    for n in range(1, 101)[::2]:
-        for m in range(1, 101)[::2]:
-            sol += 16/(m*n*np.pi**2)*np.sin(n*np.pi*x)*  np.sin(m*np.pi*y) * np.exp(-(m**2 + n**2)*np.pi**2*t)
-            # print(m, n, 8/(m*n*np.pi**2)*np.sin(n*np.pi*x) * np.sin(n*np.pi*y) * np.exp(-(m**2 + n**2)*np.pi**2*t)  )
+    for n in range(1, 101,2):
+        for m in range(1, 101,2):
+            npi = n*np.pi
+            mpi = m*np.pi
+            sol += 16/(npi*mpi)*np.sin(npi*x)*  np.sin(mpi*y) * np.exp(-(m**2 + n**2)*np.pi**2*t)
     return sol
 
 
@@ -80,6 +90,14 @@ class grid:
             T[N-1][i] = 0
         self.T = T_profile(T, 0)
         self.T_history = [self.T]
+        self.T_analytic = None
+
+    def get_analytic(self):
+        self.T_analytic = [[1 for k in range(fun.N)] for l in range(fun.N)]
+
+        for j in range(fun.N ** 2):
+            self.T_analytic[j % self.N][int(j / self.N)] = analytic_solution(self.position_x[j],
+                                                                  self.position_y[j], 0.025)
 
 
 class heat_equation:
@@ -252,32 +270,24 @@ class heat_equation:
 
 # sol = analytic_solution(0.1, 0.5,0)
 # print(sol)
-fun = heat_equation(0.025, 51, 0.00001, solve = True, solver = 'ADI', output_dir='ADI_51_min')
+fun = heat_equation(0.025, 101, 0.0001, solve = True, solver = 'ADI', output_dir='ADI_51_min')
 # print(fun.solve_grid.T.vals)
-
-T_anal = [[1 for k in range(fun.N)] for l in range(fun.N)]
-
-
-for j in range(fun.N**2):
-        T_anal[j%fun.N][int(j/fun.N)] = analytic_solution(fun.solve_grid.position_x[j], fun.solve_grid.position_y[j], 0.025)
-        # print(fun.solve_grid.position_x[j], fun.solve_grid.position_y[j])
+fun.solve_grid.get_analytic()
 
 resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
 for j in range(fun.N):
     for k in range(fun.N):
-        resid[j][k] = T_anal[j][k] - fun.solve_grid.T.vals[j][k]
+        resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
 
-print(fun.solve_grid.T.vals)
-print(T_anal)
-print(resid)
+
 
 
 fig, ax = plt.subplots(3,1, figsize=(10, 10))
 ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=2)
 ax[0].set_title(f'ADI solver')
-ax[1].imshow(T_anal, extent=[0, 1, 0, 1], vmin=0, vmax=2)
+ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=2)
 ax[1].set_title(f'analytic solver')
-ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.05, vmax=0.05)
+ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.0005, vmax=0.0005)
 ax[2].set_title(f'residuals')
 
 plt.show()
