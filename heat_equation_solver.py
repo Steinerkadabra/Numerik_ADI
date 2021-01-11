@@ -4,6 +4,15 @@ import os
 from tqdm import tqdm
 import time
 
+def analytic_solution(x, y, t):
+    sol = 0
+    for n in range(1, 101)[::2]:
+        for m in range(1, 101)[::2]:
+            sol += 16/(m*n*np.pi**2)*np.sin(n*np.pi*x)*  np.sin(m*np.pi*y) * np.exp(-(m**2 + n**2)*np.pi**2*t)
+            # print(m, n, 8/(m*n*np.pi**2)*np.sin(n*np.pi*x) * np.sin(n*np.pi*y) * np.exp(-(m**2 + n**2)*np.pi**2*t)  )
+    return sol
+
+
 def thomas_algorithm(a_i: list, b_i: list, c_i: list, d_i: list) -> list:
     """
     Solve a system of linear equation defined with a tridiagonal matrix by the use of the Thomas algorithm.
@@ -197,30 +206,32 @@ class heat_equation:
         Told = self.solve_grid.T.vals.copy()
 
         T_new = self.solve_grid.T.vals.copy()
-        for i in range(1, self.N - 1):
-            T_i = Told[i].copy()
-            a = [1.0 for k in range(self.N-2)]
-            b = [-(2+ self.rho) for k in range(self.N-2)]
-            c = [1.0 for k in range(self.N-2)]
-            d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
-            T_new_i = thomas_algorithm(a, b, c, d)
-            T_new_i.insert(0, 0)
-            T_new_i.append(0)
-            T_new[i] = T_new_i.copy()
 
-        Told = trans(T_new.copy())
+        if self.step%2 == 0:
+            for i in range(1, self.N - 1):
+                T_i = Told[i].copy()
+                a = [1.0 for k in range(self.N-2)]
+                b = [-(2+ self.rho) for k in range(self.N-2)]
+                c = [1.0 for k in range(self.N-2)]
+                d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
+                T_new_i = thomas_algorithm(a, b, c, d)
+                T_new_i.insert(0, 0)
+                T_new_i.append(0)
+                T_new[i] = T_new_i.copy()
+        else:
+            Told = trans(T_new.copy())
 
-        for i in range(1, self.N - 1):
-            T_i = Told[i].copy()
-            a = [1.0 for k in range(self.N-2)]
-            b = [-(2+ self.rho) for k in range(self.N-2)]
-            c = [1.0 for k in range(self.N-2)]
-            d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
-            T_new_i = thomas_algorithm(a, b, c, d)
-            T_new_i.insert(0, 0)
-            T_new_i.append(0)
-            T_new[i] = T_new_i.copy()
-        T_new = trans(T_new.copy())
+            for i in range(1, self.N - 1):
+                T_i = Told[i].copy()
+                a = [1.0 for k in range(self.N-2)]
+                b = [-(2+ self.rho) for k in range(self.N-2)]
+                c = [1.0 for k in range(self.N-2)]
+                d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
+                T_new_i = thomas_algorithm(a, b, c, d)
+                T_new_i.insert(0, 0)
+                T_new_i.append(0)
+                T_new[i] = T_new_i.copy()
+            T_new = trans(T_new.copy())
 
         self.solve_grid.T = T_profile(T_new, self.dt*self.step)
         self.solve_grid.T_history.append(self.solve_grid.T)
@@ -239,10 +250,37 @@ class heat_equation:
         ax.imshow(self.solve_grid.T.vals, extent = [0,1, 0, 1], vmin = 0, vmax = 1)
         ax.set_title(f'step: {self.step}     time :' + '{:06.5f}'.format(self.dt * self.step, 7))
 
+# sol = analytic_solution(0.1, 0.5,0)
+# print(sol)
+fun = heat_equation(0.025, 51, 0.00001, solve = True, solver = 'ADI', output_dir='ADI_51_min')
+# print(fun.solve_grid.T.vals)
+
+T_anal = [[1 for k in range(fun.N)] for l in range(fun.N)]
 
 
-fun = heat_equation(0.1, 51, 0.001, solve = True, solver = 'ADI', output_dir='ADI_51_min', save_plots=True, save_video=True)
+for j in range(fun.N**2):
+        T_anal[j%fun.N][int(j/fun.N)] = analytic_solution(fun.solve_grid.position_x[j], fun.solve_grid.position_y[j], 0.025)
+        # print(fun.solve_grid.position_x[j], fun.solve_grid.position_y[j])
 
+resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
+for j in range(fun.N):
+    for k in range(fun.N):
+        resid[j][k] = T_anal[j][k] - fun.solve_grid.T.vals[j][k]
+
+print(fun.solve_grid.T.vals)
+print(T_anal)
+print(resid)
+
+
+fig, ax = plt.subplots(3,1, figsize=(10, 10))
+ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=2)
+ax[0].set_title(f'ADI solver')
+ax[1].imshow(T_anal, extent=[0, 1, 0, 1], vmin=0, vmax=2)
+ax[1].set_title(f'analytic solver')
+ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.05, vmax=0.05)
+ax[2].set_title(f'residuals')
+
+plt.show()
 
 
 
