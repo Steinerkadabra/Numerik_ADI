@@ -272,32 +272,35 @@ class heat_equation:
         ax.imshow(self.solve_grid.T.vals, extent = [0,1, 0, 1], vmin = 0, vmax = 1)
         ax.set_title(f'step: {self.step}     time :' + '{:06.5f}'.format(self.dt * self.step, 7))
 
-# sol = analytic_solution(0.1, 0.5,0)
-# print(sol)
-fun = heat_equation(0.025, 101, 0.00001, solve = True, solver = 'explicit', output_dir='ADI_51_min')
-# print(fun.solve_grid.T.vals)
-fun.solve_grid.get_analytic()
-
-resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
-for j in range(fun.N):
-    for k in range(fun.N):
-        resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
 
 
 
-
-fig, ax = plt.subplots(1,3, figsize=(13, 3))
-p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
-fig.colorbar(p1, ax=ax[0])
-ax[0].set_title(f'ecplicit solver')
-p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
-fig.colorbar(p2, ax=ax[1])
-ax[1].set_title(f'analytic solution')
-p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.1, vmax=0.1)
-fig.colorbar(p3, ax=ax[2])
-ax[2].set_title(f'residuals')
-
-plt.savefig('explicit.jpg')
+# # sol = analytic_solution(0.1, 0.5,0)
+# # print(sol)
+# fun = heat_equation(0.025, 101, 0.00001, solve = True, solver = 'explicit', output_dir='ADI_51_min')
+# # print(fun.solve_grid.T.vals)
+# fun.solve_grid.get_analytic()
+#
+# resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
+# for j in range(fun.N):
+#     for k in range(fun.N):
+#         resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
+#
+#
+#
+#
+# fig, ax = plt.subplots(1,3, figsize=(13, 3))
+# p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+# fig.colorbar(p1, ax=ax[0])
+# ax[0].set_title(f'ecplicit solver')
+# p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+# fig.colorbar(p2, ax=ax[1])
+# ax[1].set_title(f'analytic solution')
+# p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.1, vmax=0.1)
+# fig.colorbar(p3, ax=ax[2])
+# ax[2].set_title(f'residuals')
+#
+# plt.savefig('explicit.jpg')
 
 
 
