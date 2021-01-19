@@ -4,7 +4,10 @@ import os
 from tqdm import tqdm
 import time
 
-
+def resid(T1, T2):
+    # print(T1[10][10], T2[10][10])
+    print(np.array(T1)-np.array(T2))
+    return sum(sum(((np.array(T1)-np.array(T2))**2)))
 
 def analytic_solution(x, y, t, nFourier=101):
     """
@@ -96,12 +99,11 @@ class grid:
         self.T_history = [self.T]
         self.T_analytic = None
 
-    def get_analytic(self):
-        self.T_analytic = [[1 for k in range(fun.N)] for l in range(fun.N)]
-
-        for j in range(fun.N ** 2):
+    def get_analytic(self, nFourier = 101):
+        self.T_analytic = [[1 for k in range(self.N)] for l in range(self.N)]
+        for j in range(self.N ** 2):
             self.T_analytic[j % self.N][int(j / self.N)] = analytic_solution(self.position_x[j],
-                                                                  self.position_y[j], 0.025)
+                                                                  self.position_y[j], self.T.time, nFourier = nFourier)
 
 
 class heat_equation:
@@ -131,18 +133,22 @@ class heat_equation:
         self.T_end = T_end
         self.N = N
         self.dxy = 1/(N-1)
-        self.dt = dt
         self.solver = solver
-        if self.dt >= 1/(4*N**2) and self.solver == 'explicit':
+        if dt >= 1/(4*N**2) and self.solver == 'explicit':
             print('timestep to small. Explicit solver not stable')
-            self.dt = 1/(4*N**2)
-            print(f'set timestep to max stable value: {self.dt}')
+            dt = 1/(4*N**2)
+            print(f'set timestep to max stable value: {dt}')
+
+        self.num_timesteps = int(T_end/dt + 1)
+        self.num_timesteps = self.num_timesteps + self.num_timesteps%2
+        self.dt = T_end/(int(self.num_timesteps))
         self.rho = self.dxy**2/self.dt
+        print('Adjust timestep to reach exact each:')
+        print(f'timestep before:{dt},    timestep now: {self.dt},     num_timesteps: {self.num_timesteps}')
         self.grid = None
         self.t0 = 0
         self.Tinit = Tinit
         self.step = 0
-        self.num_steps = int(T_end/self.dt)
         self.fig_number = 1
         self.output_dir = output_dir
         if os.path.isdir(self.output_dir):
@@ -195,11 +201,12 @@ class heat_equation:
 
     def solve(self):
         print('Start solving')
-        for i in tqdm(range(self.num_steps)):
+        for i in tqdm(range(self.num_timesteps)):
             if self.solver == 'explicit':
                 self.take_step_explicit(save_plot=self.save_plots, show_plot=self.show_plots)
             if self.solver == 'ADI':
                 self.take_step_ADI(save_plot=self.save_plots, show_plot=self.show_plots)
+        print(f'Finished at age of: {self.solve_grid.T.time}')
 
     def save_results(self):
         np.savetxt(self.output_dir + '/T_profile_final.txt', np.array(self.solve_grid.T.vals) )
@@ -230,11 +237,11 @@ class heat_equation:
         T_new = self.solve_grid.T.vals.copy()
 
         if self.step%2 == 0:
+            a = [1.0 for k in range(self.N-2)]
+            b = [-(2+ self.rho) for k in range(self.N-2)]
+            c = [1.0 for k in range(self.N-2)]
             for i in range(1, self.N - 1):
                 T_i = Told[i].copy()
-                a = [1.0 for k in range(self.N-2)]
-                b = [-(2+ self.rho) for k in range(self.N-2)]
-                c = [1.0 for k in range(self.N-2)]
                 d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
                 T_new_i = thomas_algorithm(a, b, c, d)
                 T_new_i.insert(0, 0)
@@ -242,12 +249,11 @@ class heat_equation:
                 T_new[i] = T_new_i.copy()
         else:
             Told = trans(T_new.copy())
-
+            a = [1.0 for k in range(self.N-2)]
+            b = [-(2+ self.rho) for k in range(self.N-2)]
+            c = [1.0 for k in range(self.N-2)]
             for i in range(1, self.N - 1):
                 T_i = Told[i].copy()
-                a = [1.0 for k in range(self.N-2)]
-                b = [-(2+ self.rho) for k in range(self.N-2)]
-                c = [1.0 for k in range(self.N-2)]
                 d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
                 T_new_i = thomas_algorithm(a, b, c, d)
                 T_new_i.insert(0, 0)
