@@ -96,7 +96,7 @@ class grid:
             T[0][i] = 0
             T[N-1][i] = 0
         self.T = T_profile(T, 0)
-        self.T_history = [self.T]
+        # self.T_history = [self.T] This is not a good idea for larger gridsizes
         self.T_analytic = None
 
     def get_analytic(self, nFourier = 101):
@@ -220,7 +220,7 @@ class heat_equation:
             for j in range(1, self.N-1):
                 T[i][j] = Told[i][j] + (Told[i-1][j] + Told[i+1][j] + Told[i][j+1]+ Told[i][j-1]- 4* Told[i][j])/self.rho
         self.solve_grid.T = T_profile(T, self.dt*self.step)
-        self.solve_grid.T_history.append(self.solve_grid.T)
+        # self.solve_grid.T_history.append(self.solve_grid.T)
         if save_plot or show_plot:
             self.plot()
             if save_plot and self.step %self.save_steps == 0:
@@ -262,7 +262,7 @@ class heat_equation:
             T_new = trans(T_new.copy())
 
         self.solve_grid.T = T_profile(T_new, self.dt*self.step)
-        self.solve_grid.T_history.append(self.solve_grid.T)
+        # self.solve_grid.T_history.append(self.solve_grid.T)
         if save_plot or show_plot:
             self.plot()
             if save_plot and self.step %self.save_steps == 0:
