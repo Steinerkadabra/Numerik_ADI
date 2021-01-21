@@ -1,0 +1,146 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{biblatex}
+
+\newtheorem{theorem}{Theorem}
+
+
+\addbibresource{general.bib}
+
+\begin{document}
+
+
+\section*{Analytic solution of Heat equation:}
+We consider the heat equation
+\begin{align}
+    \frac{\partial^2 T}{ \partial x ^2} + \frac{\partial^2 T}{ \partial y ^2} = \frac{\partial T}{ \partial t}
+\end{align}
+in the range $0 \leq x \leq 1$ and  $0 \leq y \leq 1$ with the boundary conditions
+\begin{align}
+    T(0,y,t) = T(1, y, t) = T(x, 0, t) = T(x, 1, t) = 0
+\end{align}
+and the initial state $T =1$. We solve the equation be seperating the variables, such that
+\begin{align}
+    T(x, y, t) = v(x, y) * \Tilde{T}(t) \\
+    \Longrightarrow \Tilde{T}\left(\frac{\partial^2 v}{ \partial x ^2} + \frac{\partial^2 v}{ \partial y ^2}  \right) = v \frac{\partial \Tilde{T}}{ \partial t}.
+\end{align}
+Thus,
+\begin{align}
+\frac{v_{xx} + v_{yy}}{v} = \frac{\Tilde{T}'}{\Tilde{T}} \overset{!}{=} -\lambda \quad \quad {\rm constant},
+\end{align}
+where, e.g.  $v_{xx} = \frac{\partial^2 T}{ \partial x ^2}$ and e.g. $\Tilde{T}' = \frac{\partial \Tilde{T}(t)}{\partial t}$.
+
+This is a Sturm-Luisville problem for $v(x, y)$ with the equation
+\begin{align}
+    v_{xx} + v_{yy} + \lambda v = 0
+\end{align}
+with the boundary conditions
+\begin{align}
+    v(0,y,t) = v(1, y, t) = v(x, 0, t) = v(x, 1, t) = 0.
+\end{align}
+Seperating the variables according to
+\begin{align}
+    v(x, y) = X(x) Y(y)
+\end{align}
+yields
+\begin{align}
+    X''Y + XY''+ XY\lambda = 0\\
+    \Longrightarrow  X''Y + XY''=- XY\lambda .
+\end{align}
+Hence, we have that
+\begin{align}
+    \frac{X''}{X} + \frac{Y''}{Y} = -\lambda \\
+    \longrightarrow \frac{Y''}{Y} + \lambda. = -\frac{X''}{X} \overset{!}{=} \mu \quad \quad{\rm constant}.
+\end{align}
+For $X(x)$ this results in the equation
+\begin{align}
+    X'' + \mu X = 0
+\end{align}
+with boundary conditions
+\begin{align}
+    X(0) = X(1) = 0.
+\end{align}
+The solution for the differential equation is
+\begin{align}
+    X(x) = A \cos(\sqrt{\mu}x) + B\sin(\sqrt{\mu}x).
+\end{align}
+Inserting the boundary conditions yields
+\begin{align}
+    &X(0) = 0 = A \\
+    X(1) = 0 = A &\cos(\sqrt{\mu}) + B\sin(\sqrt{\mu}) = B\sin(\sqrt{\mu}).
+\end{align}
+Since we are looking for a non-trivial solution, $B \neq 0$, we have that
+\begin{align}
+    &\sin(\sqrt{\mu}) \overset{!}{=} 0 \\
+    \Longrightarrow X_n(x) = B_n \sin(n\pi  x) \quad& {\rm for} \quad \mu_n = n^2\pi^2 \quad \forall \,n = 1, 2, 3, ...
+\end{align}
+For $Y(y)$ we have the equation
+\begin{align}
+    X'' + \nu X = 0 \quad \quad {\rm with} \quad \nu = \lambda - \mu
+\end{align}
+and the boundary conditions
+\begin{align}
+    Y(0) = Y(1) = 0.
+\end{align}
+The solution to the differential equation is again
+\begin{align}
+    Y(y) = \Tilde{A} \cos(\sqrt{\nu}y) + \Tilde{B}\sin(\sqrt{\nu}y).
+\end{align}
+Inserting the boundary conditions yields
+\begin{align}
+    &Y(0) = 0 = \Tilde{A} \\
+    Y(1) = 0 = \Tilde{A} &\cos(\sqrt{\mu}) + \Tilde{B}\sin(\sqrt{\mu}) = \Tilde{B}\sin(\sqrt{\mu}).
+\end{align}
+Since we are again looking for a non-trivial solution we have
+\begin{align}
+    &\sin(\sqrt{\nu}) \overset{!}{=} 0 \\
+    \Longrightarrow Y_m(y) = \Tilde{B}_m \sin(m\pi  y)& \quad {\rm for} \quad \mu_m = m^2\pi^2 \quad \forall \,m = 1, 2, 3, ...
+\end{align}
+The solution for $v(x,y)$ is hence
+\begin{align}
+    v(x,y) = X(x)Y(y) = A_{nm} \sin(n\pi  x) \sin(m\pi  y),
+\end{align}
+where $A_{nm} = B_n \Tilde{B}_m$.
+
+For $\Tilde{T}$ it follows that
+\begin{align}
+    &\frac{\Tilde{T}'}{\Tilde{T}} = -\lambda \quad \quad {\rm with} \quad \lambda = \nu_m + \mu_n \\
+    &\Longrightarrow \Tilde{T}' = -\lambda \Tilde{T}
+\end{align}
+Hence, the solution is
+\begin{align}
+    T(t) &= \exp(-\lambda t) \\
+    &=\exp(-(\nu_m + \mu_n)t) \\
+    &= \exp(-(m^2+ n^2)\pi^2t) \quad \forall \,m,n = 1, 2, 3, ...
+\end{align}
+
+For $T(x, y, t)$ we have
+\begin{align}
+    T(x, y, t) &= \sum_{m=1}^\infty\sum_{n=1}^\infty T_{m n}(x, y, t) \\
+    &= \sum_{m=1}^\infty\sum_{n=1}^\infty A_{m n}\sin(n\pi  x) \sin(m\pi  y)\exp(-(m^2+ n^2)\pi^2t)
+\end{align}
+The initial conditions are
+\begin{align}
+    1 = \sum_{m=1}^\infty\sum_{n=1}^\infty A_{m n}\sin(n\pi  x) \sin(m\pi  y)\
+\end{align}
+from which we can find $A_{mn}$ using the orthogonality relations for $\sin$. We have that
+\begin{align}
+    A_{mn} &= 4 \int_0^1 \int_0^1\sin(n\pi  x) \sin(m\pi  y)\mathrm{d}x\mathrm{d}y \\
+    &= 4 \int_0^1 \sin(n\pi  x)\mathrm{d}x\int_0^1 \sin(m\pi  y)\mathrm{d}y \\
+    &= 4 \frac{1}{n \pi} \cos(n\pi) \frac{1}{m \pi} \cos(m\pi) \\
+    &=\frac{4}{nm\pi^2}\left((-1)^n -1\right)\left((-1)^ -1\right).
+\end{align}
+Which reduces to
+\begin{align}
+    A_{2m2n} &=0 \\
+    A_{(2m-1)(2n-1)} = \frac{16}{(2m-1)(2n-1)\pi^2}.
+\end{align}
+Hence, the solution for the heat equation with our boundary condition and initial conditions is
+\begin{align}
+    T(x, y, t) = \sum_{m=1}^\infty\sum_{n=1}^\infty \frac{16}{(2m-1)(2n-1)\pi^2} \sin(n\pi  x) \sin(m\pi  y)\exp(-(m^2+ n^2)\pi^2t)
+\end{align}
+
+
+
+\end{document}

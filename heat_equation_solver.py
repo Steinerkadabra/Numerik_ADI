@@ -4,6 +4,32 @@ import os
 from tqdm import tqdm
 import time
 
+def resid(T1, T2):
+    # print(T1[10][10], T2[10][10])
+    print(np.array(T1)-np.array(T2))
+    return sum(sum(((np.array(T1)-np.array(T2))**2)))
+
+def analytic_solution(x, y, t, nFourier=101):
+    """
+    Calculate the analytic solution for the test problem. (Sum would need to go infinity of course).
+    :param x: x position
+    :param y: y position
+    :param t: time
+    :return: solution for the temperature of position (x,y) at time t.
+    """
+    ns = np.arange(1, nFourier, 2) * np.pi
+    fexp = np.exp(-ns**2 * t)
+    coeff = 4/ns * fexp
+
+    fx = coeff * np.sin(ns*x)
+    fy = coeff * np.sin(ns*y)
+
+    sol = np.einsum('i,j->', fx, fy)
+
+    return sol
+
+
+
 def thomas_algorithm(a_i: list, b_i: list, c_i: list, d_i: list) -> list:
     """
     Solve a system of linear equation defined with a tridiagonal matrix by the use of the Thomas algorithm.
@@ -70,7 +96,14 @@ class grid:
             T[0][i] = 0
             T[N-1][i] = 0
         self.T = T_profile(T, 0)
-        self.T_history = [self.T]
+        # self.T_history = [self.T] This is not a good idea for larger gridsizes
+        self.T_analytic = None
+
+    def get_analytic(self, nFourier = 101):
+        self.T_analytic = [[1 for k in range(self.N)] for l in range(self.N)]
+        for j in range(self.N ** 2):
+            self.T_analytic[j % self.N][int(j / self.N)] = analytic_solution(self.position_x[j],
+                                                                  self.position_y[j], self.T.time, nFourier = nFourier)
 
 
 class heat_equation:
@@ -100,18 +133,22 @@ class heat_equation:
         self.T_end = T_end
         self.N = N
         self.dxy = 1/(N-1)
-        self.dt = dt
         self.solver = solver
-        if self.dt >= 1/(4*N**2) and self.solver == 'explicit':
+        if dt >= 1/(4*N**2) and self.solver == 'explicit':
             print('timestep to small. Explicit solver not stable')
-            self.dt = 1/(4*N**2)
-            print(f'set timestep to max stable value: {self.dt}')
+            dt = 1/(4*N**2)
+            print(f'set timestep to max stable value: {dt}')
+
+        self.num_timesteps = int(T_end/dt + 1)
+        self.num_timesteps = self.num_timesteps + self.num_timesteps%2
+        self.dt = T_end/(int(self.num_timesteps))
         self.rho = self.dxy**2/self.dt
+        print('Adjust timestep to reach exact each:')
+        print(f'timestep before:{dt},    timestep now: {self.dt},     num_timesteps: {self.num_timesteps}')
         self.grid = None
         self.t0 = 0
         self.Tinit = Tinit
         self.step = 0
-        self.num_steps = int(T_end/self.dt)
         self.fig_number = 1
         self.output_dir = output_dir
         if os.path.isdir(self.output_dir):
@@ -164,11 +201,12 @@ class heat_equation:
 
     def solve(self):
         print('Start solving')
-        for i in tqdm(range(self.num_steps)):
+        for i in tqdm(range(self.num_timesteps)):
             if self.solver == 'explicit':
                 self.take_step_explicit(save_plot=self.save_plots, show_plot=self.show_plots)
             if self.solver == 'ADI':
                 self.take_step_ADI(save_plot=self.save_plots, show_plot=self.show_plots)
+        print(f'Finished at age of: {self.solve_grid.T.time}')
 
     def save_results(self):
         np.savetxt(self.output_dir + '/T_profile_final.txt', np.array(self.solve_grid.T.vals) )
@@ -182,7 +220,7 @@ class heat_equation:
             for j in range(1, self.N-1):
                 T[i][j] = Told[i][j] + (Told[i-1][j] + Told[i+1][j] + Told[i][j+1]+ Told[i][j-1]- 4* Told[i][j])/self.rho
         self.solve_grid.T = T_profile(T, self.dt*self.step)
-        self.solve_grid.T_history.append(self.solve_grid.T)
+        # self.solve_grid.T_history.append(self.solve_grid.T)
         if save_plot or show_plot:
             self.plot()
             if save_plot and self.step %self.save_steps == 0:
@@ -197,33 +235,34 @@ class heat_equation:
         Told = self.solve_grid.T.vals.copy()
 
         T_new = self.solve_grid.T.vals.copy()
-        for i in range(1, self.N - 1):
-            T_i = Told[i].copy()
+
+        if self.step%2 == 0:
             a = [1.0 for k in range(self.N-2)]
             b = [-(2+ self.rho) for k in range(self.N-2)]
             c = [1.0 for k in range(self.N-2)]
-            d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
-            T_new_i = thomas_algorithm(a, b, c, d)
-            T_new_i.insert(0, 0)
-            T_new_i.append(0)
-            T_new[i] = T_new_i.copy()
-
-        Told = trans(T_new.copy())
-
-        for i in range(1, self.N - 1):
-            T_i = Told[i].copy()
+            for i in range(1, self.N - 1):
+                T_i = Told[i].copy()
+                d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
+                T_new_i = thomas_algorithm(a, b, c, d)
+                T_new_i.insert(0, 0)
+                T_new_i.append(0)
+                T_new[i] = T_new_i.copy()
+        else:
+            Told = trans(T_new.copy())
             a = [1.0 for k in range(self.N-2)]
             b = [-(2+ self.rho) for k in range(self.N-2)]
             c = [1.0 for k in range(self.N-2)]
-            d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
-            T_new_i = thomas_algorithm(a, b, c, d)
-            T_new_i.insert(0, 0)
-            T_new_i.append(0)
-            T_new[i] = T_new_i.copy()
-        T_new = trans(T_new.copy())
+            for i in range(1, self.N - 1):
+                T_i = Told[i].copy()
+                d = [-T_i[k-1] + (2- self.rho)* T_i[k]- T_i[k+1] for k in range(1, self.N-1)]
+                T_new_i = thomas_algorithm(a, b, c, d)
+                T_new_i.insert(0, 0)
+                T_new_i.append(0)
+                T_new[i] = T_new_i.copy()
+            T_new = trans(T_new.copy())
 
         self.solve_grid.T = T_profile(T_new, self.dt*self.step)
-        self.solve_grid.T_history.append(self.solve_grid.T)
+        # self.solve_grid.T_history.append(self.solve_grid.T)
         if save_plot or show_plot:
             self.plot()
             if save_plot and self.step %self.save_steps == 0:
@@ -241,8 +280,33 @@ class heat_equation:
 
 
 
-fun = heat_equation(0.1, 51, 0.001, solve = True, solver = 'ADI', output_dir='ADI_51_min', save_plots=True, save_video=True)
 
+# # sol = analytic_solution(0.1, 0.5,0)
+# # print(sol)
+# fun = heat_equation(0.025, 101, 0.00001, solve = True, solver = 'explicit', output_dir='ADI_51_min')
+# # print(fun.solve_grid.T.vals)
+# fun.solve_grid.get_analytic()
+#
+# resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
+# for j in range(fun.N):
+#     for k in range(fun.N):
+#         resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
+#
+#
+#
+#
+# fig, ax = plt.subplots(1,3, figsize=(13, 3))
+# p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+# fig.colorbar(p1, ax=ax[0])
+# ax[0].set_title(f'ecplicit solver')
+# p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+# fig.colorbar(p2, ax=ax[1])
+# ax[1].set_title(f'analytic solution')
+# p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.1, vmax=0.1)
+# fig.colorbar(p3, ax=ax[2])
+# ax[2].set_title(f'residuals')
+#
+# plt.savefig('explicit.jpg')
 
 
 
