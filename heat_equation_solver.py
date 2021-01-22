@@ -319,34 +319,34 @@ class heat_equation:
 
 
 
+##main and plotting for implicit
+# fun = heat_equation(T_end=0.025, N=101, dt=0.0001, solve = True, solver = 'implicit', output_dir='implicit_plot', v = 1)
+# fun.solve_grid.get_analytic()
 
-fun = heat_equation(T_end=0.025, N=101, dt=0.0001, solve = True, solver = 'implicit', output_dir='implicit_plot', v = 1)
-fun.solve_grid.get_analytic()
-
-resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
-for j in range(fun.N):
-    for k in range(fun.N):
-        resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
+# resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
+# for j in range(fun.N):
+    # for k in range(fun.N):
+        # resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
 
 
-fig, ax = plt.subplots(1,3, figsize=(13, 3))
+# fig, ax = plt.subplots(1,3, figsize=(13, 3))
 
-p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
-fig.colorbar(p1, ax=ax[0])
-ax[0].set_title(f'implicit solver')
+# p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+# fig.colorbar(p1, ax=ax[0])
+# ax[0].set_title(f'implicit solver')
 
-p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
-fig.colorbar(p2, ax=ax[1])
-ax[1].set_title(f'analytic solution')
+# p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+# fig.colorbar(p2, ax=ax[1])
+# ax[1].set_title(f'analytic solution')
 
-p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.1, vmax=0.1)
-fig.colorbar(p3, ax=ax[2])
-ax[2].set_title(f'residuals')
-plt.savefig('implicit.jpg')
-# plt.show()
+# p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.1, vmax=0.1)
+# fig.colorbar(p3, ax=ax[2])
+# ax[2].set_title(f'residuals')
+# plt.savefig('implicit.jpg')
+# # plt.show()
 
-print("maxerr:")
-print(np.max(np.abs(resid)))
+# print("maxerr:")
+# print(np.max(np.abs(resid)))
 
 
 
