@@ -222,7 +222,7 @@ class heat_equation:
             print("alpha = "+str(alpha))
             print("eta = "+str(eta))
             for i in tqdm(range(self.num_timesteps)):
-                self.take_step_implicit(alpha, self.v, save_plot=self.save_plots, show_plot=self.show_plots)
+                self.take_step_implicit(alpha, eta, save_plot=self.save_plots, show_plot=self.show_plots)
         print(f'Finished at age of: {self.solve_grid.T.time}')
 
 
@@ -346,7 +346,7 @@ plt.savefig('implicit.jpg')
 # plt.show()
 
 print("maxerr:")
-print(np.max(resid))
+print(np.max(np.abs(resid)))
 
 
 
