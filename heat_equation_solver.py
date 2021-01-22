@@ -112,7 +112,7 @@ class heat_equation:
     """
     def __init__(self, T_end: float, N: int, dt: float, solver: str=  'explicit', output_dir: str = 'results',
                  show_plots: bool =False, show_steps: int = 1,  save_plots: bool = False, save_steps: int = 1,
-                 solve: bool = True, show_at_end: bool= False, save_at_end: bool = False, save_video: bool = False, Tinit: list = None):
+                 solve: bool = True, show_at_end: bool= False, save_at_end: bool = False, save_video: bool = False, Tinit: list = None, mu = 3):
         """
         initiate the solver class.
         :param T_end: final time.
@@ -165,6 +165,7 @@ class heat_equation:
         self.save_plots = save_plots
         self.show_steps  = show_steps
         self.save_steps = save_steps
+        self.mu = mu
 
         if solve:
             self.produce_grid()
@@ -199,12 +200,12 @@ class heat_equation:
         print('Initialising Grid')
         self.solve_grid = grid(self.N, self.Tinit)
 
-    def _compute_implicit_params(self, mu):
+    def _compute_implicit_params(self):
         rho = self.rho
         N = self.num_timesteps
         alpha = (4+rho-np.sqrt(8*rho+rho**2+4*np.pi**2/(N**2)))/8
         K = 1-((4+rho)*np.sqrt(8*rho+rho**2+4*np.pi**2/(N**2)) - (8*rho+rho**2))/8
-        nu = mu/np.log10(1/K)
+        nu = self.mu/np.log10(1/K)
         return alpha, K, round(nu)
 
     def solve(self):
@@ -216,8 +217,7 @@ class heat_equation:
             for i in tqdm(range(self.num_timesteps)):
                 self.take_step_ADI(save_plot=self.save_plots, show_plot=self.show_plots)
         if self.solver == 'implicit':
-            mu = 3 #let fixed for now
-            alpha, K, nu = self._compute_implicit_params(mu)
+            alpha, K, nu = self._compute_implicit_params()
             for i in tqdm(range(self.num_timesteps)):
                 self.take_step_implicit(alpha, K, nu, save_plot=self.save_plots, show_plot=self.show_plots)
         print(f'Finished at age of: {self.solve_grid.T.time}')
@@ -317,39 +317,30 @@ class heat_equation:
 
 
 
-# sol = analytic_solution(0.1, 0.5,0)
-# print(sol)
-fun = heat_equation(0.025, 101, 0.00001, solve = True, solver = 'implicit', output_dir='implicit_plot')
-# fun = heat_equation(0.025, 101, 0.00001, solve = True, solver = 'explicit', output_dir='explicit_plot')
-# print(fun.solve_grid.T.vals)
+fun = heat_equation(T_end=0.025, N=101, dt=0.0001, solve = True, solver = 'implicit', output_dir='implicit_plot', mu = 1)
 fun.solve_grid.get_analytic()
 
+resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
+for j in range(fun.N):
+    for k in range(fun.N):
+        resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
+
+
 fig, ax = plt.subplots(1,3, figsize=(13, 3))
+
 p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
 fig.colorbar(p1, ax=ax[0])
 ax[0].set_title(f'implicit solver')
+
 p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
 fig.colorbar(p2, ax=ax[1])
 ax[1].set_title(f'analytic solution')
+
 p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.1, vmax=0.1)
 fig.colorbar(p3, ax=ax[2])
 ax[2].set_title(f'residuals')
-
 plt.savefig('implicit.jpg')
-# plt.savefig('explicit.jpg')
-
-# fig, ax = plt.subplots(1,3, figsize=(13, 3))
-# p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
-# fig.colorbar(p1, ax=ax[0])
-# ax[0].set_title(f'ecplicit solver')
-# p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
-# fig.colorbar(p2, ax=ax[1])
-# ax[1].set_title(f'analytic solution')
-# p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.1, vmax=0.1)
-# fig.colorbar(p3, ax=ax[2])
-# ax[2].set_title(f'residuals')
-
-# plt.savefig('implicit.jpg')
+plt.show()
 
 
 
