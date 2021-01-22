@@ -6,8 +6,8 @@ import time
 
 def resid(T1, T2):
     # print(T1[10][10], T2[10][10])
-    print(np.array(T1)-np.array(T2))
-    return sum(sum(((np.array(T1)-np.array(T2))**2)))
+    # print(np.array(T1)-np.array(T2))
+    return np.max(np.max(((np.array(T1)-np.array(T2))**2)))
 
 def analytic_solution(x, y, t, nFourier=101):
     """
@@ -219,6 +219,7 @@ class heat_equation:
         for i in range(1, self.N-1):
             for j in range(1, self.N-1):
                 T[i][j] = Told[i][j] + (Told[i-1][j] + Told[i+1][j] + Told[i][j+1]+ Told[i][j-1]- 4* Told[i][j])/self.rho
+
         self.solve_grid.T = T_profile(T, self.dt*self.step)
         # self.solve_grid.T_history.append(self.solve_grid.T)
         if save_plot or show_plot:
