@@ -112,7 +112,7 @@ class heat_equation:
     """
     def __init__(self, T_end: float, N: int, dt: float, solver: str=  'explicit', output_dir: str = 'results',
                  show_plots: bool =False, show_steps: int = 1,  save_plots: bool = False, save_steps: int = 1,
-                 solve: bool = True, show_at_end: bool= False, save_at_end: bool = False, save_video: bool = False, Tinit: list = None):
+                 solve: bool = True, show_at_end: bool= False, save_at_end: bool = False, save_video: bool = False, Tinit: list = None, v = 1):
         """
         initiate the solver class.
         :param T_end: final time.
@@ -129,6 +129,7 @@ class heat_equation:
         :param save_at_end: if True, save a plot at the end of the solving process, Default: false.
         :param save_video: if plots are saved, and this is True, produce a video of all saved plots.
         :param Tinit: initial temperature profile. If nothing given, we take the test case from the paper.
+        :param v: error reduction parameter
         """
         self.T_end = T_end
         self.N = N
@@ -165,6 +166,7 @@ class heat_equation:
         self.save_plots = save_plots
         self.show_steps  = show_steps
         self.save_steps = save_steps
+        self.v = v
 
         if solve:
             self.produce_grid()
@@ -199,14 +201,30 @@ class heat_equation:
         print('Initialising Grid')
         self.solve_grid = grid(self.N, self.Tinit)
 
+    def _compute_implicit_params(self):
+        rho = self.rho
+        N = self.num_timesteps
+        alpha = (4+rho-np.sqrt(8*rho+rho**2+4*np.pi**2/(N**2)))/8
+        K = 1-((4+rho)*np.sqrt(8*rho+rho**2+4*np.pi**2/(N**2)) - (8*rho+rho**2))/8
+        eta = self.v/np.log10(1.0/K)
+        return alpha, round(eta)
+
     def solve(self):
         print('Start solving')
-        for i in tqdm(range(self.num_timesteps)):
-            if self.solver == 'explicit':
+        if self.solver == 'explicit':
+            for i in tqdm(range(self.num_timesteps)):
                 self.take_step_explicit(save_plot=self.save_plots, show_plot=self.show_plots)
-            if self.solver == 'ADI':
+        if self.solver == 'ADI':
+            for i in tqdm(range(self.num_timesteps)):
                 self.take_step_ADI(save_plot=self.save_plots, show_plot=self.show_plots)
+        if self.solver == 'implicit':
+            alpha, eta = self._compute_implicit_params()
+            print("alpha = "+str(alpha))
+            print("eta = "+str(eta))
+            for i in tqdm(range(self.num_timesteps)):
+                self.take_step_implicit(alpha, eta, save_plot=self.save_plots, show_plot=self.show_plots)
         print(f'Finished at age of: {self.solve_grid.T.time}')
+
 
     def save_results(self):
         np.savetxt(self.output_dir + '/T_profile_final.txt', np.array(self.solve_grid.T.vals) )
@@ -222,6 +240,27 @@ class heat_equation:
 
         self.solve_grid.T = T_profile(T, self.dt*self.step)
         # self.solve_grid.T_history.append(self.solve_grid.T)
+        if save_plot or show_plot:
+            self.plot()
+            if save_plot and self.step %self.save_steps == 0:
+                plt.savefig(self.output_dir + '/t_Profile_' + '{:04d}'.format(self.fig_number) + '.png')
+                self.fig_number = self.fig_number + 1
+            if show_plot and self.step %self.show_steps == 0:
+                plt.show()
+            plt.close()
+
+    def take_step_implicit(self, alpha, eta, save_plot = False, show_plot = False):
+        self.step = self.step + 1
+        Told = self.solve_grid.T.vals.copy()
+        T = self.solve_grid.T.vals.copy()
+        for n in range(eta):
+            T, Told = Told, T #deliberately not copying but swapping names
+            for i in range(1, self.N-1):
+                for j in range(1, self.N-1):
+                    T[i][j] = Told[i][j] + alpha * (Told[i-1][j] + Told[i+1][j] + Told[i][j-1] + Told[i][j+1] - (4+self.rho)*Told[i][j] + self.rho*Told[i][j])
+
+        self.solve_grid.T = T_profile(T, self.dt*self.step)
+            # self.solve_grid.T_history.append(self.solve_grid.T)
         if save_plot or show_plot:
             self.plot()
             if save_plot and self.step %self.save_steps == 0:
@@ -281,33 +320,34 @@ class heat_equation:
 
 
 
-
-# # sol = analytic_solution(0.1, 0.5,0)
-# # print(sol)
-# fun = heat_equation(0.025, 101, 0.00001, solve = True, solver = 'explicit', output_dir='ADI_51_min')
-# # print(fun.solve_grid.T.vals)
+##main and plotting for implicit
+# fun = heat_equation(T_end=0.025, N=101, dt=0.0001, solve = True, solver = 'implicit', output_dir='implicit_plot', v = 1)
 # fun.solve_grid.get_analytic()
-#
+
 # resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
 # for j in range(fun.N):
-#     for k in range(fun.N):
-#         resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
-#
-#
-#
-#
+    # for k in range(fun.N):
+        # resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
+
+
 # fig, ax = plt.subplots(1,3, figsize=(13, 3))
+
 # p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
 # fig.colorbar(p1, ax=ax[0])
-# ax[0].set_title(f'ecplicit solver')
+# ax[0].set_title(f'implicit solver')
+
 # p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
 # fig.colorbar(p2, ax=ax[1])
 # ax[1].set_title(f'analytic solution')
+
 # p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.1, vmax=0.1)
 # fig.colorbar(p3, ax=ax[2])
 # ax[2].set_title(f'residuals')
-#
-# plt.savefig('explicit.jpg')
+# plt.savefig('implicit.jpg')
+# # plt.show()
+
+# print("maxerr:")
+# print(np.max(np.abs(resid)))
 
 
 

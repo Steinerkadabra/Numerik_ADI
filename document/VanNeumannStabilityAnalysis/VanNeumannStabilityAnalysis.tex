@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\usepackage{breqn}
 \usepackage{graphicx}
 \usepackage{pdfpages}
 \usepackage{float}
@@ -62,10 +63,22 @@
 \section{Van Neumann Stability Analysis: Explicit Scheme}
 The explicit scheme for the two dimensional heat equation is
 \begin{align}
-	&\frac{T_{j,k}^{n+1} - T_{j,k}^{n}}{\Delta t} = \frac{T_{j-1,k}^{n} - 2 T_{j,k}^{n} + T_{j+1,k}^{n}}{(\Delta x)^2} + \frac{T_{j,k-1}^{n} - 2 T_{j,k}^{n} + T_{j,k+1}^{n}}{(\Delta y)^2} \Leftrightarrow\\
-	\Leftrightarrow & T_{j,k}^{n+1} =  T_{j,k}^{n} + \frac{1}{\rho} \left( T_{j-1,k}^{n} - 2 T_{j,k}^{n} + T_{j+1,k}^{n} + T_{j,k-1}^{n} - 2 T_{j,k}^{n} + T_{j,k+1}^{n}\right)
+	&\frac{T_{j,k}^{n+1} - T_{j,k}^{n}}{\Delta t}
+	= \frac{T_{j-1,k}^{n} - 2 T_{j,k}^{n} + T_{j+1,k}^{n}}{(\Delta x)^2}
+	+ \frac{T_{j,k-1}^{n} - 2 T_{j,k}^{n} + T_{j,k+1}^{n}}{(\Delta y)^2}
+\Leftrightarrow\\
+\Leftrightarrow
+	&T_{j,k}^{n+1}
+	= T_{j,k}^{n}
+	+ \frac{1}{\rho} \left(
+		T_{j-1,k}^{n}
+		+ T_{j+1,k}^{n}
+		+ T_{j,k-1}^{n}
+		+ T_{j,k+1}^{n}
+		- 4 T_{j,k}^{n}
+	\right)
 \end{align}
-assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. We begin our Van Neumann stability analysis by inserting the fourier series
+assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. We begin our Van Neumann stability analysis by inserting the Fourier series
 \begin{equation}
 	T_{j,k}^n = \sum_{p,q = 0}^{N-1} \hat{T}^n_{p,q} e^{ipx_j + iqy_k}
 \end{equation}
@@ -99,51 +112,51 @@ Using that $x_{j+1} = {x_j} + h$ and $x_{j-1} = {x_j} - h$ and that the discreti
 		)
 	)\, e^{i(px_{j} + qy_{k})} = 0
 \end{equation}
-and because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of the triginometrical polynomials of degree $N$ in two variables we have for all $p,q \in \{0, \dots, N-1\}$ that
+and because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of the trigonometrical polynomials of degree $N$ in two variables we have for all $p,q \in \{0, \dots, N-1\}$ that
 \begin{align*}
 	  &\hat{T}^{n+1}_{p,q}
 	- \hat{T}^{n}_{p,q}
-	-\frac{1}{\rho} (
+	-\frac{1}{\rho} \left(
 		  \hat{T}^{n}_{p,q} e^{-iph}
 		+ \hat{T}^{n}_{p,q} e^{iph}
 	    + \hat{T}^{n}_{p,q} e^{-iqh}
 		+ \hat{T}^{n}_{p,q} e^{iqh}
 		-  4 \hat{T}^{n}_{p,q}
-	)= 0
+	\right)= 0
 &\Leftrightarrow\\
 \Leftrightarrow
 	  &\hat{T}^{n+1}_{p,q} =
       \hat{T}^{n}_{p,q}
-	 +\frac{1}{\rho} (
+	 +\frac{1}{\rho} \left(
 		  \hat{T}^{n}_{p,q} e^{-iph}
 		+ \hat{T}^{n}_{p,q} e^{iph}
 	    + \hat{T}^{n}_{p,q} e^{-iqh}
 		+ \hat{T}^{n}_{p,q} e^{iqh}
 		-  4 \hat{T}^{n}_{p,q}
-	)
+	\right)
 &\Leftrightarrow\\
 \Leftrightarrow
 	  &\hat{T}^{n+1}_{p,q} =
-      \hat{T}^{n}_{p,q}(
+      \hat{T}^{n}_{p,q}\left(
       1
-	 +\frac{1}{\rho} (
+	 +\frac{1}{\rho} \left(
 		  e^{-iph}
 		+ e^{iph}
 	    + e^{-qh}
 		+ e^{qh}
 		-  4
-	    )
-	)
+	    \right)
+	\right)
 &\Leftrightarrow\\
 \Leftrightarrow
 	  &\hat{T}^{n+1}_{p,q} =
-      \hat{T}^{n}_{p,q}\right(
+      \hat{T}^{n}_{p,q}\left(
       1
-	 +\frac{1}{\rho} (
+	 +\frac{1}{\rho} \left(
 		  2\cos(ph)
 	    + 2\cos(qh)
 	    - 4
-	    )
+	    \right)
 	\right)
 &\Leftrightarrow\\
 \Leftrightarrow
@@ -156,7 +169,7 @@ and because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of t
 	    \right)
 	  \right)}_{=:G_{p,q}},
 \end{align*}
-where in the last step the identity $\sin^2(\alpha\2) = \frac{1}{2}(1-\cos(\alpha))$ was used. For van neumann stability we need that $|G_{p,q}|<1$. We therefor want to find conditions on $\Delta t$ and $h$ such that
+where in the last step the identity $\sin^2(\alpha/2) = \frac{1}{2}(1-\cos(\alpha))$ was used. For van Neumann stability we need that $|G_{p,q}|<1$. We therefor want to find conditions on $\Delta t$ and $h$ such that
 \begin{equation}
 -1 \le
 	1-\frac{4}{\rho} \left(
@@ -165,10 +178,282 @@ where in the last step the identity $\sin^2(\alpha\2) = \frac{1}{2}(1-\cos(\alph
 	\right)
 	\le 1.
 \end{equation}
-The rhight hand side inequality is trivial and for the left hand side inequality we need that $\rho \geq 4$.
+The right hand side inequality is trivial and for the left hand side inequality we need that $\rho \geq 4$. This gives us the CFL condition
+\begin{equation}
+	\frac{h^2}{\Delta t} = \rho \geq 4 \Leftrightarrow \Delta t \leq \frac{h^2}{4} = \frac{1}{4N^2}.
+\end{equation}
+We conclude that $4N^2t$ time steps are needed to integrate up to a time $t$.
 
 
+\section{Van Neumann Stability Analysis: Implicit Scheme}
 
+
+The implicit scheme for the two dimensional heat equation is
+\begin{align}
+	&\frac{T_{j,k}^{n+1} - T_{j,k}^{n}}{\Delta t}
+	= \frac{T_{j-1,k}^{n+1} - 2 T_{j,k}^{n+1} + T_{j+1,k}^{n+1}}{(\Delta x)^2}
+	+ \frac{T_{j,k-1}^{n+1} - 2 T_{j,k}^{n+1} + T_{j,k+1}^{n+1}}{(\Delta y)^2}
+\Leftrightarrow\\
+\Leftrightarrow
+	&T_{j,k}^{n+1}
+	= T_{j,k}^{n}
+	+ \frac{1}{\rho} \left(
+		T_{j-1,k}^{n+1}
+		+ T_{j+1,k}^{n+1}
+		+ T_{j,k-1}^{n+1}
+		+ T_{j,k+1}^{n+1}
+		- 4 T_{j,k}^{n+1}
+	\right)
+\end{align}
+assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. Again, we begin our Van Neumann stability analysis by inserting the Fourier series
+\begin{equation}
+	T_{j,k}^n = \sum_{p,q = 0}^{N-1} \hat{T}^n_{p,q} e^{ipx_j + iqy_k}
+\end{equation}
+into the numerical stencil. We bring all terms to one side of the equation and again by using $x_{j+1} = {x_j} + h$ and $x_{j-1} = {x_j} - h$ and that the discretization in $x$ and $y$ are the same and also by placing the exponential outside of the brackets we get
+\begin{dmath}
+	\sum_{p,q = 0}^{N-1} \left(
+		\hat{T}_{p,q}^{n+1}
+		-\hat{T}_{p,q}^{n}
+		-\frac{1}{\rho}\left(
+			\hat{T}_{p,q}^{n+1} e^{-iph}
+			+ \hat{T}_{p,q}^{n+1} e^{iph}
+			+ \hat{T}_{p,q}^{n+1} e^{-iqh}+\\
+			+ \hat{T}_{p,q}^{n+1} e^{iph}
+			- 4\hat{T}_{p,q}^{n+1}
+		\right)
+	\right)
+	e^{i(px_j + qy_k)}
+	=
+	0.
+\end{dmath}
+Again because the occurring exponentials is a basis of the trigonometrical polynomials the exponentials coefficients must be zero. From this we calculate
+\begin{dmath}
+	\hat{T}_{p,q}^{n}
+	=
+	\hat{T}_{p,q}^{n+1}
+	-\frac{1}{\rho}\left(
+		\hat{T}_{p,q}^{n+1} e^{-iph}
+		+ \hat{T}_{p,q}^{n+1} e^{iph}
+		+ \hat{T}_{p,q}^{n+1} e^{-iqh}
+		+ \hat{T}_{p,q}^{n+1} e^{iph}
+		- 4\hat{T}_{p,q}^{n+1}
+	\right)
+	=
+	\hat{T}_{p,q}^{n+1}\left(
+		1
+		-\frac{1}{\rho}\left(
+			e^{-iph}
+			+e^{iph}
+			+e^{-iqh}
+			+e^{iph}
+			- 4
+		\right)
+	\right)
+	=
+	\hat{T}_{p,q}^{n+1}\left(
+		1
+		-\frac{1}{\rho}\left(
+			2\cos(ph)
+			+ 2\cos(qh)
+			- 4
+		\right)
+	\right)
+	=
+	\hat{T}_{p,q}^{n+1}\left(
+		1
+		-\frac{4}{\rho}\left(
+			\sin^2\left(\frac{ph}{2}\right)
+			+ \sin^2\left(\frac{qh}{2}\right)
+		\right)
+	\right),
+\end{dmath}
+which is equivalent to
+\begin{dmath}
+	\hat{T}_{p,q}^{n+1}
+	=
+	\hat{T}_{p,q}^{n}
+	\underbrace{
+		\frac{1}{
+			1
+			-\frac{4}{\rho}\left(
+				\sin^2\left(\frac{ph}{2}\right)
+				+ \sin^2\left(\frac{qh}{2}\right)
+			\right)
+		}.
+	}_{=:G_{p,q}}
+\end{dmath}
+Clearly here $|G_{p,q}|\leq1$ is always fulfilled. Therefore the implicit scheme is unconditionally stable and hence no CFL condition is existent.
+
+\section{Van Neumann Stability Analysis: ADI Scheme}
+The alternating direction implicit (ADI) method  consists of the two half steps
+\begin{align}
+	\frac{T_{j,k}^{2n+1} - T_{j,k}^{2n}}{\Delta t}
+	&= \frac{T_{j-1,k}^{2n+1} - 2 T_{j,k}^{2n+1} + T_{j+1,k}^{2n+1}}{(\Delta x)^2}
+	+ \frac{T_{j,k-1}^{2n} - 2 T_{j,k}^{2n} + T_{j,k+1}^{2n}}{(\Delta y)^2}
+\\
+	\frac{T_{j,k}^{2n+2} - T_{j,k}^{2n+1}}{\Delta t}
+	&= \frac{T_{j-1,k}^{2n+1} - 2 T_{j,k}^{2n+1} + T_{j+1,k}^{2n+1}}{(\Delta x)^2}
+	+ \frac{T_{j-1,k}^{2n+2} - 2 T_{j,k}^{2n+2} + T_{j+1,k}^{2n+2}}{(\Delta y)^2}
+\end{align}
+Due to the fact that these schemes are identical except for an index shift and a transposition of the $x$ and $y$ direction we only consider the first half step for the stability analysis, the second one can then easily be deduced. Using the same strategy as in the previous examples we begin by bringing all terms to one side and separating the terms of the $2n$-th step from the ones of the $(2n+1)$-th step. This leaves us with
+\begin{equation}
+	T_{j,k}^{2n+1}
+	- \frac{1}{\rho}\left(
+		T_{j-1,k}^{2n+1}
+		-2T_{j,k}^{2n+1}
+		+T_{j+1,k}^{2n+1}
+	\right)
+	-T_{j,k}^{2n}
+	- \frac{1}{\rho}\left(
+		T_{j-1,k}^{2n}
+		-2T_{j,k}^{2n}
+		+T_{j,k+1}^{2n}
+	\right)
+	=
+	0,
+\end{equation}
+assuming $\Delta x = \Delta y =: h$ and setting $\rho = \frac{h^2}{\Delta t}$. Again we start by inserting the Fourier series
+\begin{equation}
+	T_{j,k}^n = \sum_{p,q = 0}^{N-1} \hat{T}^n_{p,q} e^{ipx_j + iqy_k}
+\end{equation}
+into the numerical stencil. We bring all terms to one side of the equation and again by using $x_{j+1} = {x_j} + h$ and $x_{j-1} = {x_j} - h$ and that the discretization in $x$ and $y$ are the same and also by placing the exponential outside of the brackets we get
+\begin{dmath}
+	\sum_{p,q = 0}^{N-1}\left(
+		\hat{T}_{p,q}^{2n+1}
+		-\frac{1}{\rho}\left(
+			\hat{T}_{p,q}^{2n+1} e^{-iph}
+			- 2 \hat{T}_{p,q}^{2n+1}
+			+ \hat{T}_{p,q}^{2n+1} e^{iph}
+		\right)
+		-\\
+		-\hat{T}_{p,q}^{2n+1}
+		-\frac{1}{\rho}\left(
+			\hat{T}_{p,q}^{2n} e^{-iph}
+			- 2 \hat{T}_{p,q}^{2n}
+			+ \hat{T}_{p,q}^{2n} e^{iph}
+		\right)
+	\right)
+	e^{i(px_j + qy_k)}
+	=
+	0.
+\end{dmath}
+Because $(e^{i(px_{j} + qy_{k})})_{j,k \in \{0, ..., N-1\}}$ is a basis of the trigonometrical polynomials of degree $N$ in two variables we have for all $p,q \in \{0, \dots, N-1\}$ that the coefficients of the exponentials must be zero. Rearranging the terms gives us that for all $p,q \in \{0, \dots, N-1\}$ that
+\begin{align}
+	&\hat{T}_{p,q}^{2n+1}
+	\left(
+		1
+		-\frac{1}{\rho}\left(
+			e^{-iph}
+			+ e^{iph}
+			- 2
+		\right)
+	\right)
+	=
+	\hat{T}_{p,q}^{2n}
+	\left(
+		1
+		+\frac{1}{\rho}\left(
+			e^{-iqh}
+			+ e^{iqh}
+			- 2
+		\right)
+	\right)
+\Leftrightarrow\\
+\Leftrightarrow&
+	\hat{T}_{p,q}^{2n+1}
+	=
+	\hat{T}_{p,q}^{2n}
+	\frac{
+		1
+		-\frac{1}{\rho}\left(
+			e^{-iqh}
+			+ e^{iqh}
+			- 2
+		\right)
+	}{
+		1
+		+\frac{1}{\rho}\left(
+			e^{-iph}
+			+ e^{iph}
+			- 2
+		\right)
+	}
+	=
+	\hat{T}_{p,q}^{2n+1}
+	=
+	\hat{T}_{p,q}^{2n}
+	\frac{
+		1-\frac{1}{\rho}(2\cos(ph)- 2)
+	}{
+		1-\frac{1}{\rho}(2\cos(qh)- 2)
+	}
+\Leftrightarrow\\
+\Leftrightarrow&
+	\hat{T}_{p,q}^{2n+1}
+	=
+	\hat{T}_{p,q}^{2n}
+	\frac{
+		1-\frac{4}{\rho}\left(\sin^2\left(\frac{ph}{2}\right)\right)
+	}{
+		1+\frac{4}{\rho}\left(\sin^2\left(\frac{qh}{2}\right)\right)
+	},
+\end{align}
+where we usewhere we used $\sin^2(\alpha/2) = \frac{1}{2}(1-\cos(\alpha))$ in the last step. expanding the fraction by $\rho$ finally leaves us with
+\begin{equation}
+	\hat{T}_{p,q}^{2n+1}
+	=
+	\hat{T}_{p,q}^{2n}
+	\underbrace{
+		\frac{
+			\rho-4\sin^2\left(\frac{ph}{2}\right)
+		}{
+			\rho+4\sin^2\left(\frac{qh}{2}\right)
+		}
+	}_{=:G_{p,q}^{(1)}}.
+	\label{eq:AdiNeumann1}
+\end{equation}
+By performing an index shift and switching the two space dimensions i.e.
+\begin{eqnarray*}
+	2n &\rightarrow &2n+1\\
+	2n+1 &\rightarrow &2n+2\\
+	p &\rightarrow &q\\
+	q &\rightarrow &p
+\end{eqnarray*}
+we get the analogue equation for the second half step of the ADI method.
+\begin{equation}
+	\hat{T}_{p,q}^{2n+2}
+	=
+	\hat{T}_{p,q}^{2n+1}
+	\underbrace{
+		\frac{
+			\rho-4\sin^2\left(\frac{qh}{2}\right)
+		}{
+			\rho+4\sin^2\left(\frac{ph}{2}\right)
+		}
+	}_{=:G_{p,q}^{(2)}}.
+\end{equation}
+Unfortunately separately these steps are highly unstable as there exist values for $p,q$ and $\rho$ such that $|G_{p,q}|>1$, for example for $\rho = 1$, $q = 1$, $p = 0$ and $h = \pi$ we have $G_{p,q}^{(1)} = -3$. Also no constraint is obvious to bound $G_{p,q}^{(1)}$ by unity. In the contrary, when using both half steps alternately we get
+\begin{equation}
+	\hat{T}_{p,q}^{2n+2}
+	=
+	\hat{T}_{p,q}^{2n}
+	\underbrace{
+		\left(
+			\frac{
+				\rho-4\sin^2\left(\frac{qh}{2}\right)
+			}{
+				\rho+4\sin^2\left(\frac{ph}{2}\right)
+			}
+			\cdot
+			\frac{
+				\rho-4\sin^2\left(\frac{ph}{2}\right)
+			}{
+				\rho+4\sin^2\left(\frac{qh}{2}\right)
+			}
+		\right)
+	}_{=:G_{p,q}},
+\end{equation}
+where $G_{p,q}$ is bounded by unity (compare the nominator and denominator of different fractions respectively) and hence the ADI method is stable.
 
 
 
