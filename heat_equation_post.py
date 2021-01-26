@@ -29,14 +29,12 @@ list_implicit = 10**np.linspace(np.log10(min), np.log10(max), 5)
 #     fun = hes.heat_equation(0.0001, 1000, list_implicit[t], solve = True, solver = 'implicit_steindl', output_dir=f'results/implicit_1000')
 
 
-analytic = hes.heat_equation(0.0001, 1000, 0.00001, solve = True, solver = 'ADI', output_dir=f'analytic')
-# analytic.produce_grid()
-analytic.solve_grid.get_analytic(nFourier = 101)
-np.savetxt('analytics_1000.txt', analytic.solve_grid.T_analytic)
-
-
-T_anal =  analytic.solve_grid.T_analytic
-
+# analytic = hes.heat_equation(0.0001, 1000, 0.00001, solve = True, solver = 'ADI', output_dir=f'analytic')
+# # analytic.produce_grid()
+# analytic.solve_grid.get_analytic(nFourier = 101)
+# np.savetxt('analytics_1000.txt', analytic.solve_grid.T_analytic)
+# T_anal =  analytic.solve_grid.T_analytic
+T_anal = np.loadtxt('analytics_1000.txt')
 
 time_explicit = []
 err_explicit = []
@@ -68,14 +66,13 @@ for i in range(5):
     err_implicit.append(hes.resid(T_anal, implicit))
     time_implicit.append(implicit2[3])
 
-analytic = hes.heat_equation(0.0001, 500, 0.00001, solve = True, solver = 'ADI', output_dir=f'analytic')
-# analytic.produce_grid()
-analytic.solve_grid.get_analytic(nFourier = 101)
-np.savetxt('analytics_500.txt', analytic.solve_grid.T_analytic)
+# analytic = hes.heat_equation(0.0001, 500, 0.00001, solve = True, solver = 'ADI', output_dir=f'analytic')
+# # analytic.produce_grid()
+# analytic.solve_grid.get_analytic(nFourier = 101)
+# np.savetxt('analytics_500.txt', analytic.solve_grid.T_analytic)
+# T_anal =  analytic.solve_grid.T_analytic
 
-
-T_anal =  analytic.solve_grid.T_analytic
-
+T_anal = np.loadtxt('analytics_500.txt')
 
 time_explicit_500 = []
 err_explicit_500 = []
@@ -118,12 +115,20 @@ for i in range(1, 101):
 
 
 
+from matplotlib.lines import Line2D
+custom_lines = [Line2D([0], [0], color='r', lw=4),
+                Line2D([0], [0], color='b', lw=4),
+                Line2D([0], [0], color='g', lw=4),
+                Line2D([0], [0], color='k', marker = 'o', ls = '--', lw=1),
+                Line2D([0], [0], color='k', marker = 'o', ls = '--', mfc ='None',lw=1)]
+
+
 
 
 fig, ax  = plt.subplots( 1)
-ax.plot(time_explicit, err_explicit, 'ko--')
+ax.plot(time_explicit, err_explicit, 'ro--')
 ax.plot(time_ADI, err_ADI, 'go')
-ax.plot(time_explicit_500, err_explicit_500, 'ko--', mfc = 'None')
+ax.plot(time_explicit_500, err_explicit_500, 'ro--', mfc = 'None')
 ax.plot(time_ADI_500, err_ADI_500, 'go', mfc = 'None')
 ax.plot(time_implicit_500, err_implicit_500, 'bo--', mfc = 'None')
 ax.plot(time_implicit, err_implicit, 'bo--',)
@@ -131,7 +136,9 @@ ax.set_yscale('log')
 ax.set_xscale('log')
 ax.set_xlabel('solver time (s)')
 ax.set_ylabel('max resid at t= 0.0001')
-plt.show()
+ax.legend(custom_lines, ['explicit', 'implicit', 'ADI', 'N = 1000', 'N=500'])
+# plt.show()
+plt.savefig('work-precision.pdf')
 
 
 
