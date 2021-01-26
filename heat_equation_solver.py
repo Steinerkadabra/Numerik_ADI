@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import os
 from tqdm import tqdm
 import time
+import scipy.sparse as scs
+import scipy.sparse.linalg as linalg
 
 def resid(T1, T2):
-    # print(T1[10][10], T2[10][10])
-    # print(np.array(T1)-np.array(T2))
     return np.max(np.max(((np.array(T1)-np.array(T2))**2)))
 
 def analytic_solution(x, y, t, nFourier=101):
@@ -218,9 +218,9 @@ class heat_equation:
             for i in tqdm(range(self.num_timesteps)):
                 self.take_step_ADI(save_plot=self.save_plots, show_plot=self.show_plots)
         if self.solver == 'implicit_steindl':
-            self.get_A_implicit_steindl2()
+            self.get_A_implicit_steindl()
             for i in tqdm(range(self.num_timesteps)):
-                self.take_step_implicit_steindl2(save_plot=self.save_plots, show_plot=self.show_plots)
+                self.take_step_implicit_steindl(save_plot=self.save_plots, show_plot=self.show_plots)
         if self.solver == 'implicit':
             alpha, eta = self._compute_implicit_params()
             print("alpha = "+str(alpha))
@@ -275,63 +275,20 @@ class heat_equation:
             plt.close()
 
     def get_A_implicit_steindl(self):
-        A = np.zeros((self.N ** 2, self.N ** 2))
-        for i in range(self.N):
-            for j in range(self.N):
-                if i != 0:
-                    A[i -1 + self.N * j][i + self.N * j] = 1
-                if i != self.N-1:
-                    A[i+1 + self.N * j][i + self.N * j] = 1
-                if j != 0:
-                    A[i + self.N * j][i + self.N * (j-1)] = 1
-                if j != self.N-1:
-                    A[i + self.N * j][i + self.N * (j+1)] = 1
-                A[i + self.N * j][i + self.N * j] = -(4 + self.rho)
+        n = (self.N-2) ** 2
+        ones = np.ones(n)
+        holesU = np.ones(n)
+        holesL = np.ones(n)
+        holesU[::self.N-2] = 0
+        holesL[self.N-3::self.N-2] = 0
+        data = np.array([ones, holesL, -(4 + self.rho)*ones, holesU, ones])
+        offsets = np.array([-self.N+2, -1, 0, 1, self.N-2])
+        sparse = scs.dia_matrix((data, offsets), shape=(n, n))
 
-        self.A_implicit_steindl = A
-
-    def get_A_implicit_steindl2(self):
-        A = np.zeros(((self.N-2) ** 2, (self.N-2) ** 2))
-        for i in range((self.N-2)):
-            for j in range((self.N-2)):
-                if i != 0:
-                    A[i -1 + (self.N-2) * j][i + (self.N-2) * j] = 1
-                if i != self.N-3:
-                    A[i+1 + (self.N-2) * j][i + (self.N-2) * j] = 1
-                if j != 0:
-                    A[i + (self.N-2) * j][i + (self.N-2) * (j-1)] = 1
-                if j != self.N-3:
-                    A[i + (self.N-2) * j][i + (self.N-2) * (j+1)] = 1
-                A[i + (self.N-2) * j][i + (self.N-2) * j] = -(4 + self.rho)
-
-        self.A_implicit_steindl = A
+        self.A_implicit_steindl = sparse
 
 
     def take_step_implicit_steindl(self, save_plot=False, show_plot=False):
-        self.step = self.step + 1
-        T = self.solve_grid.T.vals.copy()
-        b = np.zeros(self.N**2)
-        for i in range(self.N):
-            for j in range(self.N):
-                b[i + self.N * j] = -self.rho*T[i][j]
-
-        T_new_vector = np.linalg.solve(self.A_implicit_steindl, b)
-        for i in range(1, self.N-1):
-            for j in range(1, self.N-1):
-                T[i][j] = T_new_vector[i + self.N * j]
-
-        self.solve_grid.T = T_profile(T, self.dt * self.step)
-        # self.solve_grid.T_history.append(self.solve_grid.T)
-        if save_plot or show_plot:
-            self.plot()
-            if save_plot and self.step % self.save_steps == 0:
-                plt.savefig(self.output_dir + '/t_Profile_' + '{:04d}'.format(self.fig_number) + '.png')
-                self.fig_number = self.fig_number + 1
-            if show_plot and self.step % self.show_steps == 0:
-                plt.show()
-            plt.close()
-
-    def take_step_implicit_steindl2(self, save_plot=False, show_plot=False):
         self.step = self.step + 1
         T = self.solve_grid.T.vals.copy()
         b = np.zeros((self.N-2) ** 2)
@@ -339,7 +296,9 @@ class heat_equation:
             for j in range((self.N-2)):
                 b[i + (self.N-2) * j] = -self.rho * T[i+1][j+1]
 
-        T_new_vector = np.linalg.solve(self.A_implicit_steindl, b)
+        self.A_implicit_steindl = scs.csr_matrix(self.A_implicit_steindl)
+        T_new_vector = linalg.spsolve(self.A_implicit_steindl, b)
+
         for i in range( (self.N-2) ):
             for j in range( (self.N-2) ):
                 T[i+1][j+1] = T_new_vector[i + (self.N-2) * j]
@@ -405,28 +364,31 @@ class heat_equation:
         ax.set_title(f'step: {self.step}     time :' + '{:06.5f}'.format(self.dt * self.step, 7))
 
 
-fun = heat_equation(0.002, 50, 0.00001, solver = 'implicit_steindl', show_at_end=True)
-fun.solve_grid.get_analytic()
-resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
-for j in range(fun.N):
-    for k in range(fun.N):
-        resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
 
-fig, ax = plt.subplots(1,3, figsize=(13, 3))
 
-p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
-fig.colorbar(p1, ax=ax[0])
-ax[0].set_title(f'implicit solver')
-
-p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
-fig.colorbar(p2, ax=ax[1])
-ax[1].set_title(f'analytic solution')
-
-p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.01, vmax=0.01)
-fig.colorbar(p3, ax=ax[2])
-ax[2].set_title(f'residuals')
-
-plt.show()
+# # dfs
+# fun = heat_equation(0.002, 300, 0.00001, solver = 'implicit_steindl', show_at_end=True)
+# fun.solve_grid.get_analytic()
+# resid =  [[1 for k in range(fun.N)] for l in range(fun.N)]
+# for j in range(fun.N):
+#     for k in range(fun.N):
+#         resid[j][k] = fun.solve_grid.T_analytic[j][k] - fun.solve_grid.T.vals[j][k]
+#
+# fig, ax = plt.subplots(1,3, figsize=(13, 3))
+#
+# p1 = ax[0].imshow(fun.solve_grid.T.vals, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+# fig.colorbar(p1, ax=ax[0])
+# ax[0].set_title(f'implicit solver')
+#
+# p2 = ax[1].imshow(fun.solve_grid.T_analytic, extent=[0, 1, 0, 1], vmin=0, vmax=1)
+# fig.colorbar(p2, ax=ax[1])
+# ax[1].set_title(f'analytic solution')
+#
+# p3 = ax[2].imshow(resid, extent=[0, 1, 0, 1], vmin=-0.01, vmax=0.01)
+# fig.colorbar(p3, ax=ax[2])
+# ax[2].set_title(f'residuals')
+#
+# plt.show()
 
 
 ##main and plotting for implicit
