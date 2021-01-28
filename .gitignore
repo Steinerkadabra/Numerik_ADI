@@ -3,7 +3,7 @@ Sheet*
 main.py
 out.mp4
 ADI*
-explicit*
+explicit/*
 venv
 transport_problem.py
 Contour_plots.py

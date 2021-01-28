@@ -2,7 +2,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import heat_equation_solver as hes
 import os
+import sys
 
+
+
+
+
+hes.heat_equation(0.025, 100, 1e-4, solver = 'ADI', save_video=True, save_plots=True,  output_dir=f'presentation')
+
+
+sys.exit()
 # hes.heat_equation(0.025, 500, 1e5, solve = True, solver = 'explicit', output_dir=f'shit')
 #
 #run multiple different timesteps
